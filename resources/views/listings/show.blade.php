@@ -66,21 +66,252 @@
   .muted { opacity:.7; font-size:.9rem; }
 
   /* ---- Flatpickr: precio por día ---- */
-  .flatpickr-day {
-    position: relative;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    line-height: 1.1; height: 60px; border-radius: 8px;
-  }
-  .flatpickr-day .price-tag{
-    position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-    font-size: .62rem; padding: 2px 6px; border-radius: 999px;
-    background: #23232366; border: 1px solid #333; color: #e6e6e6;
-    pointer-events: none; white-space: nowrap;
-  }
-  .flatpickr-day.unavailable{ background:#2a2a2acc !important; color:#777 !important; cursor:not-allowed; }
-  .flatpickr-day.selected .price-tag,
-  .flatpickr-day.startRange .price-tag,
-  .flatpickr-day.endRange .price-tag { background: rgba(0,0,0,.25); border-color: rgba(255,255,255,.35); }
+/* ========= Flatpickr: tema base minimal ========= */
+/* Ajusta colores y medidas aquí */
+:root{
+  /* contenedor */
+  --fp-bg:            #f5f5f5ff;
+  --fp-border:        #e6e6ea;
+  --fp-shadow:        0 10px 30px rgba(0,0,0,.08);
+  --fp-radius:        14px;
+
+  /* header y cabeceras */
+  --fp-header-bg:     #f7f7f9;
+  --fp-header-fg:     #0f172a;
+  --fp-weekday-fg:    #6b7280;
+
+  /* día normal */
+  --fp-day-bg:        #ffffff;
+  --fp-day-fg:        #111827;
+  --fp-day-border:    #eef0f3;
+  --fp-day-radius:    8px;
+  --fp-day-height:    52px;
+
+  /* día fuera de mes / disabled / ocupado */
+  --fp-out-bg:        #fafafa;
+  --fp-out-fg:        #a1a1aa;
+
+  --fp-disabled-bg:   #f2f3f6;
+  --fp-disabled-fg:   #9ca3af;
+  --fp-disabled-br:   #eceef2;
+
+  --fp-blocked-bg:    #f1f2f5;
+  --fp-blocked-fg:    #9aa0a6;
+  --fp-blocked-br:    #e8eaf0;
+
+  /* estados */
+  --fp-hover-br:      #d9dee6;
+  --fp-accent:        #3b82f6;
+  --fp-accent-br:     #2d5dd3;
+  --fp-range-bg:      #eaf2ff;
+  --fp-range-br:      #d6e4ff;
+  --fp-range-day-color-hover: #2d5dd3;
+  --fp-range-price-tag-color-hover: #000;
+  --fp-range-price-tag-color-hover-start-end: #1e40af;
+  --fp-range-bg-price-tag-hover: #d6e4ff;
+  --fp-range-br-price-tag-hover: #a9c1ff;
+  --fp-range-price-tag-color-hover2: #2d5dd3;
+
+  /* badge de precio */
+  --fp-price-bg:      rgba(17,24,39,.06);
+  --fp-price-br:      #e5e7eb;
+  --fp-price-fg:      #111;
+  --fp-position-price-tag-bottom: 6px;
+}
+
+/* Contenedor del calendario */
+.flatpickr-calendar.fp-base{
+  background: var(--fp-bg);
+  border: 1px solid var(--fp-border);
+  box-shadow: var(--fp-shadow);
+  border-radius: var(--fp-radius);
+  overflow: hidden;
+  color: var(--fp-day-fg);
+}
+
+/* Header meses/flechas */
+.flatpickr-calendar.fp-base .flatpickr-months{
+  background: var(--fp-header-bg);
+  border-bottom: 1px solid var(--fp-border);
+}
+.flatpickr-calendar.fp-base .flatpickr-current-month{
+  color: var(--fp-header-fg);
+  font-weight: 700;
+}
+
+/* Cabecera de días (Lu, Mar...) */
+.flatpickr-calendar.fp-base .flatpickr-weekdays{
+  background: var(--fp-header-bg);
+  border-bottom: 1px solid var(--fp-border);
+}
+.flatpickr-calendar.fp-base span.flatpickr-weekday{
+  color: var(--fp-weekday-fg);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+/* Contenedores de días: SIN padding para mantener 7 columnas */
+.flatpickr-calendar.fp-base .flatpickr-days,
+.flatpickr-calendar.fp-base .dayContainer{
+  background: var(--fp-bg);
+  padding: 0;
+  border: 0;
+}
+
+
+/* Día: SIN margin; width fijo para 7 columnas; box-sizing para que el borde no rompa */
+.flatpickr-calendar.fp-base .flatpickr-day{
+  position: relative;
+  width: 14.2857% !important;        /* 100/7 */
+  height: var(--fp-day-height);
+  margin: 0;
+  border-radius: var(--fp-day-radius);
+  border: 1px solid var(--fp-day-border);
+  background: var(--fp-day-bg);
+  color: var(--fp-day-fg);
+  line-height: 1.1;
+  box-sizing: border-box;
+}
+
+/* Fuera de mes */
+.flatpickr-calendar.fp-base .flatpickr-day.prevMonthDay,
+.flatpickr-calendar.fp-base .flatpickr-day.nextMonthDay{
+  background: var(--fp-out-bg);
+  color: var(--fp-out-fg);
+  border-color: var(--fp-day-border);
+}
+
+/* Deshabilitados (p.ej. pasado/minDate) */
+.flatpickr-calendar.fp-base .flatpickr-day.disabled,
+.flatpickr-calendar.fp-base .flatpickr-day.disabled:hover{
+  background: var(--fp-disabled-bg) !important;
+  color: var(--fp-disabled-fg) !important;
+  border-color: var(--fp-disabled-br) !important;
+  cursor: not-allowed;
+  text-decoration: none;
+  opacity: 1;
+}
+
+/* Ocupados (tu clase “unavailable”) */
+.flatpickr-calendar.fp-base .flatpickr-day.unavailable,
+.flatpickr-calendar.fp-base .flatpickr-day.unavailable:hover{
+  background: var(--fp-blocked-bg) !important;
+  color: var(--fp-blocked-fg) !important;
+  border-color: var(--fp-blocked-br) !important;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Hover / foco */
+.flatpickr-calendar.fp-base .flatpickr-day:hover{
+  border-color: var(--fp-hover-br);
+}
+.flatpickr-calendar.fp-base .flatpickr-day:focus-visible{
+  outline: 2px solid var(--fp-accent);
+  outline-offset: 1px;
+}
+
+/* Selección de rango */
+.flatpickr-calendar.fp-base .flatpickr-day.inRange{
+  background: var(--fp-range-bg);
+  border-color: var(--fp-range-br);
+  color: #0b1e44;
+}
+.flatpickr-calendar.fp-base .flatpickr-day.startRange,
+.flatpickr-calendar.fp-base .flatpickr-day.endRange,
+.flatpickr-calendar.fp-base .flatpickr-day.selected{
+  background: var(--fp-accent) !important;
+  color: #fff !important;
+  border-color: var(--fp-accent-br) !important;
+}
+
+/* Badge de precio (estructural, tú le das el look) */
+.flatpickr-day .price-tag{
+  position: absolute;
+  left: 50%;
+  bottom: var(--fp-position-price-tag-bottom, 6px);
+  transform: translateX(-50%);
+  font-size: .64rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--fp-price-bg);
+  border: 1px solid var(--fp-price-br);
+  color: var(--fp-price-fg);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.flatpickr-day.selected .price-tag,
+{
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.45);
+  color: var(--fp-range-price-tag-color-hover) !important;
+}
+
+.flatpickr-day.startRange .price-tag,
+.flatpickr-day.endRange .price-tag
+{
+  background: rgba(255,255,255,.35);
+  border-color: rgba(255,255,255,.55);
+  color: var-(--fp-range-price-tag-color-hover-start-end) !important;
+}
+
+/* ===== Opcionales (actívalos si te apetecen) ===== */
+/* Cuadrícula sutil: descomenta si quieres líneas internas*/
+/* .flatpickr-calendar.fp-base .flatpickr-day{
+  box-shadow: inset 0 0 0 1px #f1f2f4;
+} */
+
+  /* ==== Patch: neutraliza el “preview” azul del rango ==== */
+/* Cuando sólo hay una fecha seleccionada y pasas el ratón por los días,
+   Flatpickr pinta un azul por defecto. Lo alineamos con nuestro gris. */
+
+.flatpickr-calendar.fp-base .flatpickr-day.inRange,
+.flatpickr-calendar.fp-base .flatpickr-day.inRange:hover,
+.flatpickr-calendar.fp-base.rangeMode .flatpickr-day:hover {
+  background: var(--fp-range-bg) !important;
+  border-color: var(--fp-range-br) !important;
+  color: var(--fp-range-day-color-hover) !important;
+}
+
+.flatpickr-calendar.fp-base .flatpickr-day.inRange .price-tag,
+.flatpickr-calendar.fp-base .flatpickr-day.inRange .price-tag:hover,
+.flatpickr-calendar.fp-base.rangeMode .flatpickr-day .price-tag:hover {
+  background: var(--fp-range-bg-price-tag-hover) !important;
+  border-color: var(--fp-range-br-price-tag-hover) !important;
+  color: var(--fp-range-price-tag-color-hover2) !important;
+}
+
+
+/* Quitamos cualquier sombra/efecto heredado */
+.flatpickr-calendar.fp-base .flatpickr-day.inRange,
+.flatpickr-calendar.fp-base .flatpickr-day.selected,
+.flatpickr-calendar.fp-base .flatpickr-day.startRange,
+.flatpickr-calendar.fp-base .flatpickr-day.endRange {
+  box-shadow: none !important;
+}
+
+.flatpickr-calendar.fp-base .flatpickr-day.endRange:hover {
+  background: var(--fp-accent) !important;
+  border-color: var(--fp-accent-br) !important;
+  color: #fff !important;
+}
+
+.flatpickr-calendar.fp-base .flatpickr-day.endRange .price-tag {
+  background: rgba(255,255,255,.35);
+  border-color: rgba(255,255,255,.55);
+  color: #fff !important;
+}
+
+
+
+
+.flatpickr-calendar.fp-base .flatpickr-day.today {
+  background: #fffbe6;
+  border-color: var(--fp-range-br);
+  color: var(--fp-day-fg);
+}
+
 </style>
 
 
@@ -150,47 +381,80 @@ function bookingWidget() {
 
       const input = document.getElementById('daterange');
 
-      const fp = flatpickr(input, {
+      const todayYMD = () => {
+        const d = new Date();
+        const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+        };
+        const ymd = d => {
+        const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+        };
+
+        const fp = flatpickr(input, {
         locale: 'es',
-        mode: "range",
-        dateFormat: "d/m/Y",
-        minDate: "today",
-        disable: this.unavailable,   // deshabilita ocupados
+        mode: 'range',
+        dateFormat: 'Y-m-d',
+        minDate: 'today',
+        disable: this.unavailable,     // impide click/hover en no disponibles
         showMonths: 2,
+        weekNumbers: false,
         onDayCreate: (dObj, dStr, inst, dayElem) => {
-          const date = dayElem.dateObj;
-          const y = date.getFullYear();
-          const m = String(date.getMonth()+1).padStart(2,'0');
-          const d = String(date.getDate()).padStart(2,'0');
-          const key = `${y}-${m}-${d}`;
+            const k = ymd(dayElem.dateObj);
 
-          if (this.unavailable.includes(key)) {
+            // Marcar ocupados de forma consistente (aunque ya estén 'disable')
+            if (this.unavailable.includes(k)) {
             dayElem.classList.add('unavailable');
+            // Flatpickr ya los hace no seleccionables por 'disable'
             return;
-          }
+            }
 
-          const price = this.priceMap[key];
-          if (price != null) {
+            // Pinta precio
+            const price = this.priceMap[k];
+            if (price != null) {
             const span = document.createElement('span');
             span.className = 'price-tag';
-            span.textContent = `€${Number(price).toFixed(0)}`;
+            const fmt = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+            span.textContent = fmt.format(price);
+            dayElem.setAttribute('title', fmt.format(price));
             dayElem.appendChild(span);
-          }
+            }
         },
         onReady: (selectedDates, dateStr, inst) => {
-          this.fpInstance = inst;
-          this.fetchMonthPrices(inst);
+            this.fpInstance = inst;
+            // aplica tema claro
+            inst.calendarContainer.classList.add('fp-base');
+            this.fetchMonthPrices(inst);
         },
         onMonthChange: (selectedDates, dateStr, inst) => {
-          this.fetchMonthPrices(inst);
+            this.fetchMonthPrices(inst);
         },
-        onChange: (selectedDates) => {
-          this.error = null;
-          this.arrival   = selectedDates[0] ? flatpickr.formatDate(selectedDates[0], 'Y-m-d') : null;
-          this.departure = selectedDates[1] ? flatpickr.formatDate(selectedDates[1], 'Y-m-d') : null;
-          this.quote = null;
+        onChange: (selectedDates, dateStr, inst) => {
+            this.error = null;
+            this.arrival   = selectedDates[0] ? flatpickr.formatDate(selectedDates[0], 'Y-m-d') : null;
+            this.departure = selectedDates[1] ? flatpickr.formatDate(selectedDates[1], 'Y-m-d') : null;
+            this.quote = null;
+
+            // Guardas: no permitir rangos que atraviesen bloqueados o pasado
+            if (selectedDates.length === 2) {
+            const start = selectedDates[0];
+            const end   = selectedDates[1];
+
+            // iteramos [start, end) noche a noche
+            for (let d = new Date(start); d < end; d.setDate(d.getDate()+1)) {
+                const key = ymd(d);
+                const isPast = key < todayYMD();
+                if (isPast || this.unavailable.includes(key)) {
+                inst.clear();
+                this.arrival = this.departure = null;
+                this.error = 'Ese rango incluye días no disponibles. Elige otro rango.';
+                break;
+                }
+            }
+            }
         },
-      });
+        });
+
     },
 
     async fetchMonthPrices(inst) {
