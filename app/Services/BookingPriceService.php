@@ -29,6 +29,7 @@ class BookingPriceService
 
         return [
             'nights'   => $nights,
+            'price_per_night' => round($price, 2),
             'subtotal' => round($subtotal, 2),
             'cleaning' => round($cleaning, 2),
             'total'    => round($subtotal + $cleaning, 2),

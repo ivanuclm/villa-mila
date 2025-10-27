@@ -19,300 +19,336 @@
 {{-- Alpine --}}
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-{{-- @vite(['resources/css/app.css','resources/js/app.js']) --}}
+@vite(['resources/css/app.css','resources/js/app.js'])
 <style>
-  /* 1) Que el ancho incluya padding y borde en TODO */
+  /* ===== Base global ===== */
   *, *::before, *::after { box-sizing: border-box; }
 
-  body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu; padding: 2rem; }
-  .card { max-width: 900px; margin: 0 auto; background: #111; color: #eee; border-radius: 16px; padding: 1.5rem; }
+  :root{
+    /* --- Tipografía & espaciado --- */
+    --app-font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu;
+    --space-1: .25rem;
+    --space-2: .5rem;
+    --space-3: .75rem;
+    --space-4: 1rem;
 
-  /* 2) Grid responsivo */
-  .row {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: 1fr 1fr;
-  }
-  @media (max-width: 820px) {
-    .row { grid-template-columns: 1fr; }
+    /* --- Tarjeta contenedora --- */
+    --card-bg: #111;
+    --card-fg: #eee;
+    --card-radius: 16px;
+
+    /* ================= Flatpickr Variables ================= */
+    /* Contenedor calendario */
+    --fp-bg:            #f5f5f5ff;
+    --fp-border:        #e6e6ea;
+    --fp-shadow:        0 10px 30px rgba(0,0,0,.08);
+    --fp-radius:        14px;
+
+    /* Header meses + cabeceras de días */
+    --fp-header-bg:     #f7f7f9;
+    --fp-header-fg:     #0f172a;
+    --fp-header-weight: 700;
+    --fp-weekday-fg:    #6b7280;
+    --fp-weekday-weight:600;
+
+    /* Día normal */
+    --fp-day-bg:        #ffffff;
+    --fp-day-fg:        #111827;
+    --fp-day-border:    #eef0f3;
+    --fp-day-radius:    8px;
+    --fp-day-height:    48px;
+    --fp-day-width:     14.2857%; /* 100/7 columnas */
+
+    /* Días fuera de mes */
+    --fp-out-bg:        #fafafa;
+    --fp-out-fg:        #a1a1aa;
+
+    /* Días deshabilitados (pasado/minDate) */
+    --fp-disabled-bg:   #f2f3f6;
+    --fp-disabled-fg:   #9ca3af;
+    --fp-disabled-br:   #eceef2;
+
+    /* Días bloqueados (reservados) */
+    --fp-blocked-bg:    #f1f2f5;
+    --fp-blocked-fg:    #9aa0a6;
+    --fp-blocked-br:    #e8eaf0;
+
+    /* Hover/foco */
+    --fp-hover-br:      #d9dee6;
+    --fp-focus-outline: #3b82f6;
+
+    /* Selección / rango */
+    --fp-selected-bg:   #3b82f6; /* mismo que accent */
+    --fp-selected-br:   #2d5dd3;
+    --fp-selected-fg:   #ffffff;
+
+    --fp-accent:        #3b82f6;
+    --fp-accent-br:     #2d5dd3;
+    --fp-accent-fg:     #ffffff;
+    --fp-range-bg:      #eaf2ff;
+    --fp-range-br:      #d6e4ff;
+    --fp-range-day-fg:  #0b1e44;
+
+    --fp-range-conflict-fg: #ef4444;
+
+    /* “Hoy” */
+    --fp-today-bg:      #fffbe6;
+    --fp-today-br:      #ffec3d;
+    --fp-today-fg:      #613400;
+
+    /* Badge de precio */
+    --fp-price-font:    .64rem;
+    --fp-price-pad-v:   2px;
+    --fp-price-pad-h:   6px;
+    --fp-price-radius:  999px;
+    --fp-price-bg:      rgba(17,24,39,.06);
+    --fp-price-br:      #e5e7eb;
+    --fp-price-fg:      #111;
+    --fp-price-bottom:  6px;
+
+    /* Badge de precio en hover/rango/selección */
+    --fp-price-inrange-bg:  #d6e4ff;
+    --fp-price-inrange-br:  #a9c1ff;
+    --fp-price-inrange-fg:  #2d5dd3;
+
+    --fp-price-selected-bg: rgba(255,255,255,.35);
+    --fp-price-selected-br: rgba(255,255,255,.55);
+    --fp-price-selected-fg: #ffffff;
+
+    --fp-range-price-conflict-fg: #b91c1c;
+    --fp-range-price-conflict-bg: #fee2e2;
+    --fp-range-price-conflict-br: #fca5a5;
   }
 
-  /* 3) Sub-tarjetas */
+  body { font-family: var(--app-font); padding: 2rem; }
+  .card {
+    max-width: 900px; margin: 0 auto;
+    background: var(--card-bg); color: var(--card-fg);
+    border-radius: var(--card-radius); padding: 1.5rem;
+  }
+
+  .row { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 820px) { .row { grid-template-columns: 1fr; } }
+
   .row > div { background: #1b1b1b; border-radius: 12px; padding: 1rem; }
-
   label { display:block; font-size: .9rem; opacity:.8; margin-bottom:.25rem; }
 
-  /* 4) Inputs y selects no se salen (gracias al box-sizing) */
   input, select {
-    width: 100%;
-    padding: .6rem .7rem;
-    border-radius: 10px;
-    border: 1px solid #333;
-    background: #0f0f0f;
-    color: #fff;
+    width: 100%; padding: .6rem .7rem; border-radius: 10px;
+    border: 1px solid #333; background: #0f0f0f; color: #fff;
   }
-
-  /* 5) Botón alineado y sin “saltos” de ancho */
   button {
-    width: 100%;
-    padding: .7rem 1rem;
-    border-radius: 10px;
-    background: #6366f1;
-    border: 0;
-    color: #fff;
-    cursor: pointer;
+    width: 100%; padding: .7rem 1rem; border-radius: 10px;
+    background: #6366f1; border: 0; color: #fff; cursor: pointer;
   }
-
   .muted { opacity:.7; font-size:.9rem; }
 
-  /* ---- Flatpickr: precio por día ---- */
-/* ========= Flatpickr: tema base minimal ========= */
-/* Ajusta colores y medidas aquí */
-:root{
-  /* contenedor */
-  --fp-bg:            #f5f5f5ff;
-  --fp-border:        #e6e6ea;
-  --fp-shadow:        0 10px 30px rgba(0,0,0,.08);
-  --fp-radius:        14px;
+  /* =============== Flatpickr: tema base minimal =============== */
 
-  /* header y cabeceras */
-  --fp-header-bg:     #f7f7f9;
-  --fp-header-fg:     #0f172a;
-  --fp-weekday-fg:    #6b7280;
+  /* Contenedor del calendario */
+  .flatpickr-calendar.fp-base{
+    background: var(--fp-bg);
+    border: 1px solid var(--fp-border);
+    box-shadow: var(--fp-shadow);
+    border-radius: var(--fp-radius);
+    overflow: hidden;
+    color: var(--fp-day-fg);
+  }
 
-  /* día normal */
-  --fp-day-bg:        #ffffff;
-  --fp-day-fg:        #111827;
-  --fp-day-border:    #eef0f3;
-  --fp-day-radius:    8px;
-  --fp-day-height:    52px;
+  /* Header meses/flechas */
+  .flatpickr-calendar.fp-base .flatpickr-months{
+    background: var(--fp-header-bg);
+    border-bottom: 1px solid var(--fp-border);
+  }
+  .flatpickr-calendar.fp-base .flatpickr-current-month{
+    color: var(--fp-header-fg);
+    font-weight: var(--fp-header-weight);
+  }
 
-  /* día fuera de mes / disabled / ocupado */
-  --fp-out-bg:        #fafafa;
-  --fp-out-fg:        #a1a1aa;
+  /* Cabecera de días (Lu, Mar...) */
+  .flatpickr-calendar.fp-base .flatpickr-weekdays{
+    background: var(--fp-header-bg);
+    border-bottom: 1px solid var(--fp-border);
+  }
+  .flatpickr-calendar.fp-base span.flatpickr-weekday{
+    color: var(--fp-weekday-fg);
+    font-weight: var(--fp-weekday-weight);
+    letter-spacing: .02em;
+  }
 
-  --fp-disabled-bg:   #f2f3f6;
-  --fp-disabled-fg:   #9ca3af;
-  --fp-disabled-br:   #eceef2;
+  /* Contenedores de días: SIN padding para mantener 7 columnas */
+  .flatpickr-calendar.fp-base .flatpickr-days,
+  .flatpickr-calendar.fp-base .dayContainer{
+    background: var(--fp-bg);
+    padding: 0; border: 0;
+  }
 
-  --fp-blocked-bg:    #f1f2f5;
-  --fp-blocked-fg:    #9aa0a6;
-  --fp-blocked-br:    #e8eaf0;
+  /* Día */
+  .flatpickr-calendar.fp-base .flatpickr-day{
+    position: relative;
+    width: var(--fp-day-width) !important;
+    height: var(--fp-day-height);
+    margin: 0;
+    border-radius: var(--fp-day-radius);
+    border: 1px solid var(--fp-day-border);
+    background: var(--fp-day-bg);
+    color: var(--fp-day-fg);
+    line-height: 1.1;
+    box-sizing: border-box;
+  }
 
-  /* estados */
-  --fp-hover-br:      #d9dee6;
-  --fp-accent:        #3b82f6;
-  --fp-accent-br:     #2d5dd3;
-  --fp-range-bg:      #eaf2ff;
-  --fp-range-br:      #d6e4ff;
-  --fp-range-day-color-hover: #2d5dd3;
-  --fp-range-price-tag-color-hover: #000;
-  --fp-range-price-tag-color-hover-start-end: #1e40af;
-  --fp-range-bg-price-tag-hover: #d6e4ff;
-  --fp-range-br-price-tag-hover: #a9c1ff;
-  --fp-range-price-tag-color-hover2: #2d5dd3;
+  /* Fuera de mes */
+  .flatpickr-calendar.fp-base .flatpickr-day.prevMonthDay,
+  .flatpickr-calendar.fp-base .flatpickr-day.nextMonthDay{
+    background: var(--fp-out-bg);
+    color: var(--fp-out-fg);
+    border-color: var(--fp-day-border);
+  }
 
-  /* badge de precio */
-  --fp-price-bg:      rgba(17,24,39,.06);
-  --fp-price-br:      #e5e7eb;
-  --fp-price-fg:      #111;
-  --fp-position-price-tag-bottom: 6px;
+  /* Deshabilitados */
+    /* DÍAS PASADOS: mismo look que "ocupados", pero sin tachado */
+  .flatpickr-calendar.fp-base .flatpickr-day.flatpickr-disabled,
+  .flatpickr-calendar.fp-base .flatpickr-day.flatpickr-disabled:hover {
+    background: var(--fp-disabled-bg) !important;  /* mismo fondo que ocupados */
+    color: var(--fp-disabled-fg) !important;       /* mismo color que ocupados */
+    border-color: var(--fp-disabled-br) !important;
+    cursor: not-allowed;
+    text-decoration: none;             /* ← sin tachado */
+    opacity: 1;
+  }
+
+
+  /* Bloqueados (ocupados) */
+  .flatpickr-calendar.fp-base .flatpickr-day.unavailable,
+  .flatpickr-calendar.fp-base .flatpickr-day.unavailable:hover{
+    background: var(--fp-blocked-bg) !important;
+    color: var(--fp-blocked-fg) !important;
+    border-color: var(--fp-blocked-br) !important;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  /* Hover / foco */
+  .flatpickr-calendar.fp-base .flatpickr-day:hover{
+    border-color: var(--fp-hover-br);
+  }
+  .flatpickr-calendar.fp-base .flatpickr-day:focus-visible{
+    outline: 2px solid var(--fp-focus-outline);
+    outline-offset: 1px;
+  }
+
+  /* Selección / rango */
+  .flatpickr-calendar.fp-base .flatpickr-day.inRange{
+    background: var(--fp-range-bg);
+    border-color: var(--fp-range-br);
+    color: var(--fp-range-day-fg);
+  }
+  .flatpickr-calendar.fp-base .flatpickr-day.startRange,
+  .flatpickr-calendar.fp-base .flatpickr-day.endRange,
+  .flatpickr-calendar.fp-base .flatpickr-day.selected{
+    background: var(--fp-selected-bg) !important;
+    border-color: var(--fp-selected-br) !important;
+    color: var(--fp-selected-fg) !important;
+    box-shadow: none !important;
+  }
+
+  /* “Hoy” */
+  .flatpickr-calendar.fp-base .flatpickr-day.today {
+    background: var(--fp-today-bg); !important;
+    border-color: var(--fp-today-br); !important;
+    color: var(--fp-today-fg); !important;
+  }
+
+  /* Badge de precio */
+  .flatpickr-day .price-tag{
+    position: absolute;
+    left: 50%;
+    bottom: var(--fp-price-bottom);
+    transform: translateX(-50%);
+    font-size: var(--fp-price-font);
+    line-height: 1;
+    padding: var(--fp-price-pad-v) var(--fp-price-pad-h);
+    border-radius: var(--fp-price-radius);
+    background: var(--fp-price-bg);
+    border: 1px solid var(--fp-price-br);
+    color: var(--fp-price-fg);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* Precio en rango (preview/hover) */
+  .flatpickr-calendar.fp-base .flatpickr-day.inRange .price-tag,
+  .flatpickr-calendar.fp-base.rangeMode .flatpickr-day:hover .price-tag{
+    background: var(--fp-price-inrange-bg);
+    border-color: var(--fp-price-inrange-br);
+    color: var(--fp-price-inrange-fg);
+  }
+
+  /* Precio en seleccionado (inicio/fin) */
+  .flatpickr-calendar.fp-base .flatpickr-day.startRange .price-tag,
+  .flatpickr-calendar.fp-base .flatpickr-day.endRange .price-tag,
+  .flatpickr-calendar.fp-base .flatpickr-day.selected .price-tag{
+    background: var(--fp-price-selected-bg);
+    border-color: var(--fp-price-selected-br);
+    color: var(--fp-price-selected-fg);
+  }
+
+  .flatpickr-calendar.fp-base .flatpickr-day.endRange:hover .price-tag {
+    background: var(--fp-price-selected-bg);
+    border-color: var(--fp-price-selected-br);
+    color: var(--fp-price-selected-fg) ;
+  }
+
+  /* Neutraliza el “preview” azul por defecto */
+  .flatpickr-calendar.fp-base .flatpickr-day.inRange,
+  .flatpickr-calendar.fp-base .flatpickr-day.inRange:hover,
+  .flatpickr-calendar.fp-base.rangeMode .flatpickr-day:hover {
+    background: var(--fp-range-bg);
+    border-color: var(--fp-range-br);
+    color: var(--fp-range-day-fg);
+  }
+
+  .flatpickr-calendar.fp-base .flatpickr-day.endRange,
+  .flatpickr-calendar.fp-base .flatpickr-day.endRange:hover,
+  .flatpickr-calendar.fp-base.rangeMode .flatpickr-day:hover {
+    background: var(--fp-accent) ;
+    border-color: var(--fp-accent-br);
+    color: var(--fp-accent-fg);
+  }
+
+  /* ===== Opcional: cuadrícula sutil ===== */
+  /* .flatpickr-calendar.fp-base .flatpickr-day{ box-shadow: inset 0 0 0 1px #f1f2f4; } */
+
+  .flatpickr-calendar.fp-base.fp-no-cross .flatpickr-day:hover {
+  background: var(--fp-day-bg) !important;
+  border-color: var(--fp-day-border) !important;
+  cursor: not-allowed !important;
 }
 
-/* Contenedor del calendario */
-.flatpickr-calendar.fp-base{
-  background: var(--fp-bg);
-  border: 1px solid var(--fp-border);
-  box-shadow: var(--fp-shadow);
-  border-radius: var(--fp-radius);
-  overflow: hidden;
-  color: var(--fp-day-fg);
-}
 
-/* Header meses/flechas */
-.flatpickr-calendar.fp-base .flatpickr-months{
-  background: var(--fp-header-bg);
-  border-bottom: 1px solid var(--fp-border);
-}
-.flatpickr-calendar.fp-base .flatpickr-current-month{
-  color: var(--fp-header-fg);
-  font-weight: 700;
-}
-
-/* Cabecera de días (Lu, Mar...) */
-.flatpickr-calendar.fp-base .flatpickr-weekdays{
-  background: var(--fp-header-bg);
-  border-bottom: 1px solid var(--fp-border);
-}
-.flatpickr-calendar.fp-base span.flatpickr-weekday{
-  color: var(--fp-weekday-fg);
-  font-weight: 600;
-  letter-spacing: .02em;
-}
-
-/* Contenedores de días: SIN padding para mantener 7 columnas */
-.flatpickr-calendar.fp-base .flatpickr-days,
-.flatpickr-calendar.fp-base .dayContainer{
-  background: var(--fp-bg);
-  padding: 0;
-  border: 0;
-}
-
-
-/* Día: SIN margin; width fijo para 7 columnas; box-sizing para que el borde no rompa */
-.flatpickr-calendar.fp-base .flatpickr-day{
+/* Marca suave la celda “problemática” */
+.flatpickr-day.fp-hover-blocked {
   position: relative;
-  width: 14.2857% !important;        /* 100/7 */
-  height: var(--fp-day-height);
-  margin: 0;
-  border-radius: var(--fp-day-radius);
-  border: 1px solid var(--fp-day-border);
-  background: var(--fp-day-bg);
-  color: var(--fp-day-fg);
-  line-height: 1.1;
-  box-sizing: border-box;
+  color: var(--fp-range-conflict-fg) !important;
 }
 
-/* Fuera de mes */
-.flatpickr-calendar.fp-base .flatpickr-day.prevMonthDay,
-.flatpickr-calendar.fp-base .flatpickr-day.nextMonthDay{
-  background: var(--fp-out-bg);
-  color: var(--fp-out-fg);
-  border-color: var(--fp-day-border);
+/* Marca suave la celda “problemática” */
+.flatpickr-day:hover.fp-hover-blocked .price-tag {
+  color: var(--fp-range-price-conflict-fg) !important;
+  background: var(--fp-range-price-conflict-bg) !important;
+  border-color: var(--fp-range-price-conflict-br) !important;
 }
 
-/* Deshabilitados (p.ej. pasado/minDate) */
-.flatpickr-calendar.fp-base .flatpickr-day.disabled,
-.flatpickr-calendar.fp-base .flatpickr-day.disabled:hover{
-  background: var(--fp-disabled-bg) !important;
-  color: var(--fp-disabled-fg) !important;
-  border-color: var(--fp-disabled-br) !important;
-  cursor: not-allowed;
-  text-decoration: none;
-  opacity: 1;
-}
-
-/* Ocupados (tu clase “unavailable”) */
-.flatpickr-calendar.fp-base .flatpickr-day.unavailable,
-.flatpickr-calendar.fp-base .flatpickr-day.unavailable:hover{
-  background: var(--fp-blocked-bg) !important;
-  color: var(--fp-blocked-fg) !important;
-  border-color: var(--fp-blocked-br) !important;
-  cursor: not-allowed;
-  text-decoration: line-through;
-}
-
-/* Hover / foco */
-.flatpickr-calendar.fp-base .flatpickr-day:hover{
-  border-color: var(--fp-hover-br);
-}
-.flatpickr-calendar.fp-base .flatpickr-day:focus-visible{
-  outline: 2px solid var(--fp-accent);
-  outline-offset: 1px;
-}
-
-/* Selección de rango */
-.flatpickr-calendar.fp-base .flatpickr-day.inRange{
-  background: var(--fp-range-bg);
-  border-color: var(--fp-range-br);
-  color: #0b1e44;
-}
-.flatpickr-calendar.fp-base .flatpickr-day.startRange,
-.flatpickr-calendar.fp-base .flatpickr-day.endRange,
-.flatpickr-calendar.fp-base .flatpickr-day.selected{
-  background: var(--fp-accent) !important;
-  color: #fff !important;
-  border-color: var(--fp-accent-br) !important;
-}
-
-/* Badge de precio (estructural, tú le das el look) */
-.flatpickr-day .price-tag{
+.flatpickr-day.fp-hover-blocked::after {
+  content: "";
   position: absolute;
-  left: 50%;
-  bottom: var(--fp-position-price-tag-bottom, 6px);
-  transform: translateX(-50%);
-  font-size: .64rem;
-  line-height: 1;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--fp-price-bg);
-  border: 1px solid var(--fp-price-br);
-  color: var(--fp-price-fg);
+  inset: 0;
+  border: 2px dashed var(--fp-range-conflict-fg);
+  border-radius: var(--fp-day-radius);
   pointer-events: none;
-  white-space: nowrap;
 }
-.flatpickr-day.selected .price-tag,
-{
-  background: rgba(255,255,255,.25);
-  border-color: rgba(255,255,255,.45);
-  color: var(--fp-range-price-tag-color-hover) !important;
-}
-
-.flatpickr-day.startRange .price-tag,
-.flatpickr-day.endRange .price-tag
-{
-  background: rgba(255,255,255,.35);
-  border-color: rgba(255,255,255,.55);
-  color: var-(--fp-range-price-tag-color-hover-start-end) !important;
-}
-
-/* ===== Opcionales (actívalos si te apetecen) ===== */
-/* Cuadrícula sutil: descomenta si quieres líneas internas*/
-/* .flatpickr-calendar.fp-base .flatpickr-day{
-  box-shadow: inset 0 0 0 1px #f1f2f4;
-} */
-
-  /* ==== Patch: neutraliza el “preview” azul del rango ==== */
-/* Cuando sólo hay una fecha seleccionada y pasas el ratón por los días,
-   Flatpickr pinta un azul por defecto. Lo alineamos con nuestro gris. */
-
-.flatpickr-calendar.fp-base .flatpickr-day.inRange,
-.flatpickr-calendar.fp-base .flatpickr-day.inRange:hover,
-.flatpickr-calendar.fp-base.rangeMode .flatpickr-day:hover {
-  background: var(--fp-range-bg) !important;
-  border-color: var(--fp-range-br) !important;
-  color: var(--fp-range-day-color-hover) !important;
-}
-
-.flatpickr-calendar.fp-base .flatpickr-day.inRange .price-tag,
-.flatpickr-calendar.fp-base .flatpickr-day.inRange .price-tag:hover,
-.flatpickr-calendar.fp-base.rangeMode .flatpickr-day .price-tag:hover {
-  background: var(--fp-range-bg-price-tag-hover) !important;
-  border-color: var(--fp-range-br-price-tag-hover) !important;
-  color: var(--fp-range-price-tag-color-hover2) !important;
-}
-
-
-/* Quitamos cualquier sombra/efecto heredado */
-.flatpickr-calendar.fp-base .flatpickr-day.inRange,
-.flatpickr-calendar.fp-base .flatpickr-day.selected,
-.flatpickr-calendar.fp-base .flatpickr-day.startRange,
-.flatpickr-calendar.fp-base .flatpickr-day.endRange {
-  box-shadow: none !important;
-}
-
-.flatpickr-calendar.fp-base .flatpickr-day.endRange:hover {
-  background: var(--fp-accent) !important;
-  border-color: var(--fp-accent-br) !important;
-  color: #fff !important;
-}
-
-.flatpickr-calendar.fp-base .flatpickr-day.endRange .price-tag {
-  background: rgba(255,255,255,.35);
-  border-color: rgba(255,255,255,.55);
-  color: #fff !important;
-}
-
-
-
-
-.flatpickr-calendar.fp-base .flatpickr-day.today {
-  background: #fffbe6;
-  border-color: var(--fp-range-br);
-  color: var(--fp-day-fg);
-}
-
 </style>
+
 
 
 </head>
@@ -346,6 +382,7 @@
       <template x-if="quote">
         <div>
           <p><strong>Noche(s):</strong> <span x-text="quote.nights"></span></p>
+          <p><strong>Precio por noche:</strong> €<span x-text="quote.price_per_night.toFixed(2)"></span></p>
           <p><strong>Subtotal:</strong> €<span x-text="quote.subtotal.toFixed(2)"></span></p>
           <p><strong>Limpieza:</strong> €<span x-text="quote.cleaning.toFixed(2)"></span></p>
           <hr>
@@ -372,6 +409,25 @@ function bookingWidget() {
     priceMap: {},
     error: null,
     fpInstance: null,
+    ymd(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    },
+
+    // ¿Entre start y end hay algún día "unavailable"?
+    rangeCrossesUnavailable(startDate, endDate) {
+      const locked = new Set(this.unavailable);
+      const a = startDate < endDate ? startDate : endDate;
+      const b = startDate < endDate ? endDate : startDate;
+
+      // recorre [a, b)
+      for (let d = new Date(a); d < b; d.setDate(d.getDate() + 1)) {
+        if (locked.has(this.ymd(d))) return true;
+      }
+      return false;
+    },
 
     async init() {
       // Fechas no disponibles
@@ -380,6 +436,8 @@ function bookingWidget() {
       this.unavailable = data.unavailable ?? [];
 
       const input = document.getElementById('daterange');
+
+      // yyyy-mm-dd
 
       const todayYMD = () => {
         const d = new Date();
@@ -412,13 +470,50 @@ function bookingWidget() {
             // Pinta precio
             const price = this.priceMap[k];
             if (price != null) {
-            const span = document.createElement('span');
-            span.className = 'price-tag';
-            const fmt = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-            span.textContent = fmt.format(price);
-            dayElem.setAttribute('title', fmt.format(price));
-            dayElem.appendChild(span);
+              const span = document.createElement('span');
+              span.className = 'price-tag';
+              const fmt = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+              span.textContent = fmt.format(price);
+              dayElem.setAttribute('title', fmt.format(price));
+              dayElem.appendChild(span);
             }
+
+             // --- Feedback al intentar cruzar bloqueos ---
+            const enter = () => {
+              // solo tiene sentido si ya hay una fecha de inicio seleccionada
+              if (!this.fpInstance || this.fpInstance.selectedDates.length !== 1) return;
+
+              const start = this.fpInstance.selectedDates[0];
+              const hover = dayElem.dateObj;
+
+              if (hover > start && this.rangeCrossesUnavailable(start, hover)) {
+                // activa modo "no se puede cruzar"
+                this.fpInstance.calendarContainer.classList.add('fp-no-cross');
+                dayElem.classList.add('fp-hover-blocked');
+              }
+            };
+
+            const leave = () => {
+              if (!this.fpInstance) return;
+              this.fpInstance.calendarContainer.classList.remove('fp-no-cross');
+              dayElem.classList.remove('fp-hover-blocked');
+            };
+
+            const stopIfBlocked = (e) => {
+              if (!this.fpInstance || this.fpInstance.selectedDates.length !== 1) return;
+              const start = this.fpInstance.selectedDates[0];
+              const hover = dayElem.dateObj;
+
+              if (hover > start && this.rangeCrossesUnavailable(start, hover)) {
+                // Evita seleccionar segundo extremo inválido
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            };
+
+            dayElem.addEventListener('mouseenter', enter);
+            dayElem.addEventListener('mouseleave', leave);
+            dayElem.addEventListener('click', stopIfBlocked);
         },
         onReady: (selectedDates, dateStr, inst) => {
             this.fpInstance = inst;
@@ -452,6 +547,8 @@ function bookingWidget() {
                 }
             }
             }
+
+            inst.calendarContainer.classList.remove('fp-no-cross');
         },
         });
 

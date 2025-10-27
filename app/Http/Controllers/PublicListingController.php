@@ -97,7 +97,9 @@ class PublicListingController extends Controller
 
             // Precio por 1 noche [date, date+1)
             $q = $svc->quote($listing, $date, $day->copy()->addDay()->toDateString(), $guests);
-            $prices[$date] = $q['total'];
+            // $prices[$date] = $q['total']; // total (incluye limpieza)
+            // $prices[$date] = $q['price_per_night']; // precio por noche
+            $prices[$date] = $q['subtotal']; // subtotal (sin limpieza)
         }
 
         return response()->json(['prices' => $prices]);
