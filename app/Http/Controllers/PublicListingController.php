@@ -16,9 +16,35 @@ class PublicListingController extends Controller
         // Datos básicos para la vista
         return view('listings.show', [
             'listing' => $listing->only([
-                'id','name','slug','address','license_number','max_guests','description','lat','lng'
+                'id',
+                'name',
+                'slug',
+                'address',
+                'license_number',
+                'max_guests',
+                'description',
+                'lat',
+                'lng'
             ]),
         ]);
+    }
+
+    public function index()
+    {
+        // Más adelante podrás filtrar por "publicado", orden por prioridad, etc.
+        $listings = Listing::query()
+            ->orderBy('name')
+            ->get([
+                'id',
+                'name',
+                'slug',
+                'address',
+                'license_number',
+                'max_guests',
+                'description',
+            ]);
+
+        return view('home', compact('listings'));
     }
 
     public function unavailableDates(Listing $listing)
