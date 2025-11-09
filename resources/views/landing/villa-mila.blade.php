@@ -344,7 +344,7 @@
         <a href="#entorno">Entorno</a>
         <a href="#como-llegar">Cómo llegar</a>
     </nav>
-    <a class="navbar__cta" href="{{ route('public.listing.show', $listing['slug']) }}#reserva">
+    <a class="navbar__cta" href="{{ route('public.booking') }}">
         Reservar ahora
     </a>
 </header>
@@ -366,7 +366,7 @@
         </p>
 
         <div class="hero__cta-row">
-            <a class="btn-primary" href="{{ route('public.listing.show', $listing['slug']) }}#reserva">
+            <a class="btn-primary" href="{{ route('public.booking') }}">
                 Reservar ahora
             </a>
             <a class="btn-ghost" href="#sobre">
@@ -443,19 +443,19 @@
         <div class="gallery-strip" id="galleryStrip">
             {{-- De momento, imágenes estáticas. Sustituye las URLs por tus fotos reales --}}
             <div class="gallery-item">
-                <img src="/images/gallery-1.jpg" alt="Piscina y terraza de Villa Mila">
+                <img src="/images/EXTERIORdia2.jpg" alt="Piscina y terraza de Villa Mila">
             </div>
             <div class="gallery-item">
-                <img src="/images/gallery-2.jpg" alt="Zona exterior con mesa y sillas">
+                <img src="/images/EXTERIORdia3.jpg" alt="Zona exterior con mesa y sillas">
             </div>
             <div class="gallery-item">
-                <img src="/images/gallery-3.jpg" alt="Habitación principal">
+                <img src="/images/EXTERIORnoche.jpg" alt="Habitación principal">
             </div>
             <div class="gallery-item">
-                <img src="/images/gallery-4.jpg" alt="Vista del entorno natural">
+                <img src="/images/PUERTAplaca.jpg" alt="Vista del entorno natural">
             </div>
             <div class="gallery-item">
-                <img src="/images/gallery-5.jpg" alt="Detalle del salón">
+                <img src="/images/VistasVERDE.jpg" alt="Detalle del salón">
             </div>
         </div>
     </section>
