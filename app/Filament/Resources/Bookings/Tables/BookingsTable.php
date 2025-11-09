@@ -20,7 +20,7 @@ class BookingsTable
                 TextColumn::make('customer_name')->label('Cliente')->searchable(),
                 TextColumn::make('arrival')->date()->label('Llegada')->sortable(),
                 TextColumn::make('departure')->date()->label('Salida')->sortable(),
-                TextColumn::make('guests')->label('Huéspedes'),
+                TextColumn::make('guests')->label('Viajeros'),
                 TextColumn::make('status')->badge()->colors([
                     'warning' => 'pending',
                     'info'    => 'hold',

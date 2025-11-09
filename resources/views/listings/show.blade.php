@@ -365,7 +365,7 @@
 
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:.75rem; margin-top:.75rem">
         <div>
-          <label>Huéspedes</label>
+          <label>Viajeros</label>
           <input type="number" min="1" :max="maxGuests" x-model.number="guests" @change="refreshPrices()">
         </div>
         <div>
