@@ -44,7 +44,7 @@ class PublicListingController extends Controller
                 'description',
             ]);
 
-        return view('home', compact('listings'));
+        return view('listings.index', compact('listings'));
     }
 
     public function unavailableDates(Listing $listing)
