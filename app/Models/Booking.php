@@ -9,9 +9,26 @@ class Booking extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['listing_id','customer_name','customer_email','arrival','departure','guests','status','total','source'];
+    protected $fillable = [
+        'listing_id',
+        'customer_name',
+        'customer_email',
+        'customer_phone',
+        'arrival',
+        'departure',
+        'guests',
+        'status',
+        'total',
+        'source',
+        'notes',
+        'terms_accepted_at',
+    ];
 
-    protected $casts = ['arrival'=>'date','departure'=>'date'];
+    protected $casts = [
+        'arrival'=>'date',
+        'departure'=>'date',
+        'terms_accepted_at'=>'datetime',
+    ];
     
     public function listing() { return $this->belongsTo(Listing::class); }
 }

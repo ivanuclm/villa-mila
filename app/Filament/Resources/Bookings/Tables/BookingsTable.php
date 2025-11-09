@@ -18,6 +18,8 @@ class BookingsTable
             ->columns([
                 TextColumn::make('listing.name')->label('Alojamiento')->searchable()->sortable(),
                 TextColumn::make('customer_name')->label('Cliente')->searchable(),
+                TextColumn::make('customer_email')->label('Email')->searchable(),
+                TextColumn::make('customer_phone')->label('Teléfono')->searchable(),
                 TextColumn::make('arrival')->date()->label('Llegada')->sortable(),
                 TextColumn::make('departure')->date()->label('Salida')->sortable(),
                 TextColumn::make('guests')->label('Viajeros'),

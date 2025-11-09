@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Listing, Booking};
 use App\Services\BookingPriceService;
+use App\Http\Requests\StorePublicBookingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Carbon\CarbonPeriod;
@@ -103,5 +104,70 @@ class PublicListingController extends Controller
         }
 
         return response()->json(['prices' => $prices]);
+    }
+
+    public function book(StorePublicBookingRequest $request, Listing $listing, BookingPriceService $svc)
+    {
+        $data = $request->validated();
+
+        // 1) Comprobar disponibilidad de nuevo en servidor
+        $arrival   = Carbon::parse($data['arrival']);
+        $departure = Carbon::parse($data['departure']);
+
+        $overlapExists = Booking::query()
+            ->where('listing_id', $listing->id)
+            ->whereIn('status', ['confirmed', 'hold'])
+            ->where(function ($q) use ($arrival, $departure) {
+                // solape clásico: NOT (end <= A OR start >= B)
+                $q->where('arrival', '<', $departure)
+                  ->where('departure', '>', $arrival);
+            })
+            ->exists();
+
+        if ($overlapExists) {
+            return response()->json([
+                'ok'    => false,
+                'error' => 'Las fechas seleccionadas ya no están disponibles. Por favor, selecciona otro rango.',
+            ], 422);
+        }
+
+        // 2) Recalcular precio con servicio (no confiamos en el cliente)
+        $quote = $svc->quote(
+            $listing,
+            $arrival->toDateString(),
+            $departure->toDateString(),
+            (int) $data['guests']
+        );
+
+        // 3) Crear reserva en estado "hold"
+        $booking = Booking::create([
+            'listing_id'        => $listing->id,
+            'customer_name'     => $data['customer_name'],
+            'customer_email'    => $data['customer_email'],
+            'customer_phone'    => $data['customer_phone'] ?? null,
+            'arrival'           => $arrival,
+            'departure'         => $departure,
+            'guests'            => (int) $data['guests'],
+            'status'            => 'hold',
+            'total'             => $quote['total'],   // total final
+            'source'            => 'web',
+            'notes'             => $data['notes'] ?? null,
+            'terms_accepted_at' => now(),
+        ]);
+
+        // 4) TODO (siguiente paso): mails a cliente y propietaria
+
+        return response()->json([
+            'ok'      => true,
+            'booking' => [
+                'id'        => $booking->id,
+                'status'    => $booking->status,
+                'arrival'   => $booking->arrival->toDateString(),
+                'departure' => $booking->departure->toDateString(),
+                'guests'    => $booking->guests,
+                'total'     => $booking->total,
+            ],
+            'quote'   => $quote,
+        ]);
     }
 }
