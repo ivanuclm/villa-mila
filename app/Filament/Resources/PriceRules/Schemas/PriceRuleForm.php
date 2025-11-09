@@ -37,8 +37,8 @@ class PriceRuleForm
                 TextInput::make('min_nights')->numeric()->minValue(1)->default(1)->label('Mín. noches')->columnSpan(1),
                 TextInput::make('cleaning_fee')->numeric()->default(0)->prefix('€')->label('Limpieza')->columnSpan(1),
 
-                TextInput::make('included_guests')->numeric()->minValue(1)->default(2)->label('Huéspedes incluidos')->columnSpan(1),
-                TextInput::make('extra_guest_fee')->numeric()->default(0)->prefix('€')->label('Extra por huésped')->columnSpan(1),
+                TextInput::make('included_guests')->numeric()->minValue(1)->default(2)->label('Viajeros incluidos')->columnSpan(1),
+                TextInput::make('extra_guest_fee')->numeric()->default(0)->prefix('€')->label('Extra por viajero')->columnSpan(1),
 
                 Toggle::make('is_override')->label('Prioritaria (override)')->inline(false)->columnSpanFull(),
             ]),

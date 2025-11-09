@@ -25,7 +25,7 @@ class BookingForm
                 DatePicker::make('arrival')->required()->label('Llegada'),
                 DatePicker::make('departure')->required()->label('Salida'),
 
-                TextInput::make('guests')->numeric()->minValue(1)->label('Huéspedes'),
+                TextInput::make('guests')->numeric()->minValue(1)->label('Viajeros'),
 
                 Select::make('status')
                     ->options([
