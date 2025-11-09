@@ -392,6 +392,50 @@
       <template x-if="!quote">
         <p class="muted">Selecciona fechas y pulsa “Calcular precio”.</p>
       </template>
+      
+      <hr style="margin:1rem 0; border-color:#27272a;">
+
+      <h4 style="margin:0 0 .5rem 0; font-size:.95rem;">Tus datos</h4>
+
+      <div style="display:flex; flex-direction:column; gap:.5rem;">
+        <div>
+          <label>Nombre y apellidos</label>
+          <input type="text" x-model="customer_name" placeholder="Nombre completo">
+        </div>
+
+        <div>
+          <label>Email</label>
+          <input type="email" x-model="customer_email" placeholder="tucorreo@ejemplo.com">
+        </div>
+
+        <div>
+          <label>Teléfono (opcional)</label>
+          <input type="tel" x-model="customer_phone" placeholder="+34 ...">
+        </div>
+
+        <div>
+          <label>Comentarios (opcional)</label>
+          <textarea x-model="notes"
+                    rows="3"
+                    style="width:100%; padding:.6rem .7rem; border-radius:10px; border:1px solid #333; background:#0f0f0f; color:#fff;"></textarea>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:.5rem; margin-top:.25rem;">
+          <input id="accept_terms" type="checkbox" x-model="accept_terms" style="width:auto; margin-top:.15rem;">
+          <label for="accept_terms" style="margin:0; font-size:.8rem; opacity:.8;">
+            He leído y acepto las condiciones de reserva y la política de privacidad.
+          </label>
+        </div>
+
+        <button
+          @click="submitBooking()"
+          :disabled="!quote || bookingLoading"
+          x-text="bookingLoading ? 'Enviando...' : 'Solicitar reserva'">
+        </button>
+
+        <p class="muted" x-show="bookingError" x-text="bookingError" style="color:#fca5a5;"></p>
+        <p class="muted" x-show="bookingSuccess" x-text="bookingSuccess" style="color:#bbf7d0;"></p>
+      </div>
     </div>
   </div>
 </div>
@@ -409,6 +453,14 @@ function bookingWidget() {
     priceMap: {},
     error: null,
     fpInstance: null,
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    notes: '',
+    accept_terms: false,
+    bookingSuccess: null,
+    bookingError: null,
+    bookingLoading: false,
     ymd(d) {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -602,6 +654,65 @@ function bookingWidget() {
       if (!res.ok) { this.error = 'No se pudo calcular el precio.'; return; }
       this.quote = await res.json();
     },
+
+    async submitBooking() {
+      this.bookingError = null;
+      this.bookingSuccess = null;
+
+      if (!this.arrival || !this.departure) {
+        this.bookingError = 'Selecciona fechas antes de reservar.';
+        return;
+      }
+
+      if (!this.quote) {
+        this.bookingError = 'Calcula primero el precio antes de reservar.';
+        return;
+      }
+
+      if (!this.accept_terms) {
+        this.bookingError = 'Debes aceptar las condiciones de la reserva.';
+        return;
+      }
+
+      this.bookingLoading = true;
+
+      try {
+        const res = await fetch(`/api/listings/${this.listingSlug}/book`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          },
+          body: JSON.stringify({
+            arrival: this.arrival,
+            departure: this.departure,
+            guests: this.guests,
+            customer_name: this.customer_name,
+            customer_email: this.customer_email,
+            customer_phone: this.customer_phone || null,
+            notes: this.notes || null,
+            accept_terms: this.accept_terms ? 1 : 0,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          this.bookingError = data.error ?? 'No se pudo completar la reserva.';
+          return;
+        }
+
+        this.bookingSuccess = `Reserva creada correctamente. Estado: ${data.booking.status.toUpperCase()}.`;
+        // Opcional: limpiar formulario o dejarlo para que vean los datos.
+      } catch (e) {
+        console.error(e);
+        this.bookingError = 'Ha ocurrido un error inesperado. Inténtalo de nuevo en unos minutos.';
+      } finally {
+        this.bookingLoading = false;
+      }
+    },
+
   }
 }
 document.addEventListener('alpine:init', () => {});

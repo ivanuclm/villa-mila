@@ -21,7 +21,7 @@ class BookingForm
 
                 TextInput::make('customer_name')->required()->label('Nombre cliente'),
                 TextInput::make('customer_email')->email()->required()->label('Email'),
-
+                TextInput::make('customer_phone')->label('Teléfono cliente')->tel()->maxLength(30),
                 DatePicker::make('arrival')->required()->label('Llegada'),
                 DatePicker::make('departure')->required()->label('Salida'),
 
