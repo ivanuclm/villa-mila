@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -25,10 +26,14 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'arrival'=>'date',
-        'departure'=>'date',
-        'terms_accepted_at'=>'datetime',
+        'arrival' => 'date',
+        'departure' => 'date',
+        'terms_accepted_at' => 'datetime',
+        'status' => BookingStatus::class,
     ];
-    
-    public function listing() { return $this->belongsTo(Listing::class); }
+
+    public function listing()
+    {
+        return $this->belongsTo(Listing::class);
+    }
 }

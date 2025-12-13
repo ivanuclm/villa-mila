@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Bookings\Schemas;
 
+use App\Enums\BookingStatus;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -28,12 +29,8 @@ class BookingForm
                 TextInput::make('guests')->numeric()->minValue(1)->label('Viajeros'),
 
                 Select::make('status')
-                    ->options([
-                        'pending'   => 'Pendiente',
-                        'hold'      => 'Bloqueo',
-                        'confirmed' => 'Confirmada',
-                        'cancelled' => 'Cancelada',
-                    ])
+                    ->options(BookingStatus::labels())
+                    ->default(BookingStatus::Pending->value)
                     ->required()
                     ->native(false)
                     ->label('Estado'),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -45,16 +46,14 @@ class BookingsCalendarWidget extends Widget
             );
 
             foreach ($period as $date) {
+                $statusValue = $booking->status instanceof BookingStatus
+                    ? $booking->status->value
+                    : (string) $booking->status;
+
                 $calendarMap[$date->toDateString()][] = [
                     'name' => $booking->customer_name,
-                    'status' => $booking->status,
-                    'label' => match ($booking->status) {
-                        'pending' => 'Pendiente',
-                        'hold' => 'Bloqueo',
-                        'confirmed' => 'Confirmada',
-                        'cancelled' => 'Cancelada',
-                        default => $booking->status,
-                    },
+                    'status' => $statusValue,
+                    'label' => BookingStatus::tryFrom($statusValue)?->label() ?? ucfirst($statusValue),
                     'listing' => $booking->listing?->name,
                 ];
             }

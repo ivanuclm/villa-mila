@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget;
@@ -14,15 +15,13 @@ class BookingStatsWidget extends StatsOverviewWidget
         $today = Carbon::today();
         $weekAhead = $today->copy()->addWeek();
 
-        $pendingCount = Booking::query()->where('status', 'pending')->count();
-        $holdCount = Booking::query()->where('status', 'hold')->count();
-        $upcomingCount = Booking::query()
-            ->whereDate('arrival', '>=', $today)
-            ->whereIn('status', ['confirmed', 'hold'])
-            ->count();
+        $pendingCount = Booking::query()->where('status', BookingStatus::Pending->value)->count();
+        $holdCount = Booking::query()->where('status', BookingStatus::Hold->value)->count();
         $arrivalsThisWeek = Booking::query()
             ->whereBetween('arrival', [$today, $weekAhead])
+            ->whereIn('status', [BookingStatus::Confirmed->value, BookingStatus::InStay->value])
             ->count();
+        $inStayCount = Booking::query()->where('status', BookingStatus::InStay->value)->count();
 
         return [
             Stat::make('Reservas pendientes', $pendingCount)
@@ -34,11 +33,11 @@ class BookingStatsWidget extends StatsOverviewWidget
                 ->color('info')
                 ->icon('heroicon-o-hand-raised'),
             Stat::make('Próximas llegadas', $arrivalsThisWeek)
-                ->description('Para los próximos 7 días')
+                ->description('Confirmadas para los próximos 7 días')
                 ->color('success')
                 ->icon('heroicon-o-calendar-days'),
-            Stat::make('Estancias futuras', $upcomingCount)
-                ->description('Confirmadas o en bloqueo')
+            Stat::make('Estancias en curso', $inStayCount)
+                ->description('Check-ins ya realizados')
                 ->color('primary')
                 ->icon('heroicon-o-home-modern'),
         ];

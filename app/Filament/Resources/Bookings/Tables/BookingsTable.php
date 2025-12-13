@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -19,6 +20,15 @@ class BookingsTable
     {
         return $table
             ->defaultSort('arrival')
+            ->recordClasses(fn (Booking $record) => match ($record->status?->value ?? (string) $record->status) {
+                BookingStatus::Pending->value => 'bg-amber-50/70 dark:bg-amber-500/10',
+                BookingStatus::Hold->value => 'bg-sky-50/70 dark:bg-sky-500/10',
+                BookingStatus::Confirmed->value => 'bg-emerald-50/70 dark:bg-emerald-500/10',
+                BookingStatus::InStay->value => 'bg-indigo-50/70 dark:bg-indigo-500/10',
+                BookingStatus::Completed->value => 'bg-slate-50/70 dark:bg-slate-500/10',
+                BookingStatus::Cancelled->value => 'bg-rose-50/70 dark:bg-rose-500/10',
+                default => '',
+            })
             ->columns([
                 TextColumn::make('listing.name')
                     ->label('Alojamiento')
@@ -42,17 +52,17 @@ class BookingsTable
                 TextColumn::make('status')
                     ->badge()
                     ->colors([
-                        'warning' => 'pending',
-                        'info'    => 'hold',
-                        'success' => 'confirmed',
-                        'danger'  => 'cancelled',
+                        'warning' => BookingStatus::Pending->value,
+                        'info' => BookingStatus::Hold->value,
+                        'success' => BookingStatus::Confirmed->value,
+                        'primary' => BookingStatus::InStay->value,
+                        'gray' => BookingStatus::Completed->value,
+                        'danger' => BookingStatus::Cancelled->value,
                     ])
-                    ->formatStateUsing(fn (string $state) => match ($state) {
-                        'pending' => 'Pendiente',
-                        'hold' => 'Bloqueo',
-                        'confirmed' => 'Confirmada',
-                        'cancelled' => 'Cancelada',
-                        default => $state,
+                    ->formatStateUsing(function ($state) {
+                        $status = $state instanceof BookingStatus ? $state : BookingStatus::tryFrom($state);
+
+                        return $status?->label() ?? ucfirst((string) $state);
                     })
                     ->label('Estado'),
                 TextColumn::make('total')->money('eur')->label('Total'),
@@ -60,12 +70,7 @@ class BookingsTable
             ->filters([
                 Filters\SelectFilter::make('status')
                     ->label('Estado')
-                    ->options([
-                        'pending'   => 'Pendiente',
-                        'hold'      => 'Bloqueo',
-                        'confirmed' => 'Confirmada',
-                        'cancelled' => 'Cancelada',
-                    ]),
+                    ->options(BookingStatus::labels()),
                 Filters\Filter::make('arrival_between')
                     ->form([
                         FilterDatePicker::make('from')->label('Desde'),
@@ -81,27 +86,52 @@ class BookingsTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()->label('Abrir ficha'),
-                    Action::make('confirm')
+                    Action::make('markPending')
+                        ->label('Volver a pendiente')
+                        ->icon('heroicon-o-arrow-uturn-left')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->visible(fn (Booking $record) => $record->status?->value !== BookingStatus::Pending->value)
+                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Pending->value])),
+                    Action::make('markHold')
+                        ->label('Bloquear fechas')
+                        ->icon('heroicon-o-pause-circle')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->visible(fn (Booking $record) => $record->status?->value !== BookingStatus::Hold->value)
+                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Hold->value])),
+                    Action::make('markConfirmed')
                         ->label('Marcar confirmada')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
-                        ->visible(fn (Booking $record) => $record->status !== 'confirmed')
-                        ->action(fn (Booking $record) => $record->update(['status' => 'confirmed'])),
-                    Action::make('pend')
-                        ->label('Mover a pendiente')
-                        ->icon('heroicon-o-clock')
-                        ->color('warning')
+                        ->visible(fn (Booking $record) => ! in_array($record->status?->value, [
+                            BookingStatus::Confirmed->value,
+                            BookingStatus::InStay->value,
+                            BookingStatus::Completed->value,
+                        ], true))
+                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Confirmed->value])),
+                    Action::make('markInStay')
+                        ->label('Registrar check-in')
+                        ->icon('heroicon-o-arrow-right-circle')
+                        ->color('primary')
                         ->requiresConfirmation()
-                        ->visible(fn (Booking $record) => $record->status !== 'pending')
-                        ->action(fn (Booking $record) => $record->update(['status' => 'pending'])),
+                        ->visible(fn (Booking $record) => $record->status?->value === BookingStatus::Confirmed->value)
+                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::InStay->value])),
+                    Action::make('markCompleted')
+                        ->label('Finalizar estancia')
+                        ->icon('heroicon-o-flag')
+                        ->color('gray')
+                        ->requiresConfirmation()
+                        ->visible(fn (Booking $record) => $record->status?->value === BookingStatus::InStay->value)
+                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Completed->value])),
                     Action::make('cancel')
                         ->label('Cancelar')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->visible(fn (Booking $record) => $record->status !== 'cancelled')
-                        ->action(fn (Booking $record) => $record->update(['status' => 'cancelled'])),
+                        ->visible(fn (Booking $record) => $record->status?->value !== BookingStatus::Cancelled->value)
+                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Cancelled->value])),
                 ])->icon('heroicon-o-ellipsis-vertical'),
             ])
             ->toolbarActions([

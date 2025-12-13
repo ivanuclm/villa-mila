@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +23,7 @@ class UpcomingBookingsWidget extends BaseWidget
     {
         return Booking::query()
             ->whereDate('departure', '>=', now())
+            ->whereNotIn('status', [BookingStatus::Cancelled->value, BookingStatus::Completed->value])
             ->orderBy('arrival');
     }
 
@@ -53,18 +55,14 @@ class UpcomingBookingsWidget extends BaseWidget
             BadgeColumn::make('status')
                 ->label('Estado')
                 ->colors([
-                    'warning' => 'pending',
-                    'info' => 'hold',
-                    'success' => 'confirmed',
-                    'danger' => 'cancelled',
+                    'warning' => BookingStatus::Pending->value,
+                    'info' => BookingStatus::Hold->value,
+                    'success' => BookingStatus::Confirmed->value,
+                    'primary' => BookingStatus::InStay->value,
+                    'gray' => BookingStatus::Completed->value,
+                    'danger' => BookingStatus::Cancelled->value,
                 ])
-                ->formatStateUsing(fn (string $state) => match ($state) {
-                    'pending' => 'Pendiente',
-                    'hold' => 'Bloqueo',
-                    'confirmed' => 'Confirmada',
-                    'cancelled' => 'Cancelada',
-                    default => $state,
-                }),
+                ->formatStateUsing(fn ($state) => ($state instanceof BookingStatus ? $state : BookingStatus::tryFrom($state))?->label() ?? ucfirst((string) $state)),
             TextColumn::make('guests')
                 ->label('Personas')
                 ->alignCenter(),

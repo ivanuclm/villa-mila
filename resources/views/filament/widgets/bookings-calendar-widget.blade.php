@@ -31,6 +31,8 @@
                                     'pending' => 'bg-amber-100 text-amber-900 ring-amber-200',
                                     'hold' => 'bg-sky-100 text-sky-900 ring-sky-200',
                                     'confirmed' => 'bg-emerald-100 text-emerald-900 ring-emerald-200',
+                                    'in_stay' => 'bg-indigo-100 text-indigo-900 ring-indigo-200',
+                                    'completed' => 'bg-slate-200 text-slate-900 ring-slate-300',
                                     'cancelled' => 'bg-rose-100 text-rose-900 ring-rose-200',
                                     default => 'bg-gray-100 text-gray-900 ring-gray-200',
                                 };

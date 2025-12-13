@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BookingStatus;
 use App\Models\{Listing, Booking};
 use App\Services\BookingPriceService;
 use App\Http\Requests\StorePublicBookingRequest;
@@ -54,10 +55,10 @@ class PublicListingController extends Controller
 
     public function unavailableDates(Listing $listing)
     {
-        // Ocupar: confirmed + hold (bloqueos)
+        // Ocupar: estados que bloquean calendario
         $bookings = Booking::query()
             ->where('listing_id', $listing->id)
-            ->whereIn('status', ['confirmed','hold'])
+            ->whereIn('status', BookingStatus::blocking())
             ->get(['arrival','departure']);
 
         $dates = [];
@@ -97,10 +98,10 @@ class PublicListingController extends Controller
         $start = Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth();
         $end   = $start->copy()->endOfMonth();
 
-        // Fechas bloqueadas (confirmed/hold)
+        // Fechas bloqueadas (confirmed/hold/in_stay)
         $bookings = Booking::query()
             ->where('listing_id', $listing->id)
-            ->whereIn('status', ['confirmed','hold'])
+            ->whereIn('status', BookingStatus::blocking())
             ->get(['arrival','departure']);
 
         $locked = [];
@@ -147,7 +148,7 @@ class PublicListingController extends Controller
 
         $overlapExists = Booking::query()
             ->where('listing_id', $listing->id)
-            ->whereIn('status', ['confirmed', 'hold'])
+            ->whereIn('status', BookingStatus::blocking())
             ->where(function ($q) use ($arrival, $departure) {
                 // solape clásico: NOT (end <= A OR start >= B)
                 $q->where('arrival', '<', $departure)
@@ -179,7 +180,7 @@ class PublicListingController extends Controller
             'arrival'           => $arrival,
             'departure'         => $departure,
             'guests'            => (int) $data['guests'],
-            'status'            => 'hold',
+            'status'            => BookingStatus::Hold->value,
             'total'             => $quote['total'],   // total final
             'source'            => 'web',
             'notes'             => $data['notes'] ?? null,
@@ -205,7 +206,7 @@ class PublicListingController extends Controller
             'ok'      => true,
             'booking' => [
                 'id'        => $booking->id,
-                'status'    => $booking->status,
+                'status'    => $booking->status?->value,
                 'arrival'   => $booking->arrival->toDateString(),
                 'departure' => $booking->departure->toDateString(),
                 'guests'    => $booking->guests,
