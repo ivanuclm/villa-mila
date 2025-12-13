@@ -9,6 +9,7 @@ use App\Filament\Resources\PriceRules\Schemas\PriceRuleForm;
 use App\Filament\Resources\PriceRules\Tables\PriceRulesTable;
 use App\Models\PriceRule;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +22,9 @@ class PriceRuleResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'id';
+
+    protected static ?string $navigationLabel = 'Reglas de Precio';
+    protected static string|UnitEnum|null $navigationGroup = 'Configuración';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,5 +50,15 @@ class PriceRuleResource extends Resource
             'create' => CreatePriceRule::route('/create'),
             'edit' => EditPriceRule::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Regla de Precio';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Reglas de Precio';
     }
 }

@@ -9,6 +9,7 @@ use App\Filament\Resources\Bookings\Schemas\BookingForm;
 use App\Filament\Resources\Bookings\Tables\BookingsTable;
 use App\Models\Booking;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +22,9 @@ class BookingResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'customer_name';
+    
+    protected static ?string $navigationLabel = 'Reservas';
+    protected static string|UnitEnum|null $navigationGroup = 'Reservas';
 
     public static function form(Schema $schema): Schema
     {
@@ -47,4 +51,15 @@ class BookingResource extends Resource
             'edit' => EditBooking::route('/{record}/edit'),
         ];
     }
+
+    public static function getModelLabel(): string
+    {
+        return 'Reserva';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Reservas';
+    }
+
 }

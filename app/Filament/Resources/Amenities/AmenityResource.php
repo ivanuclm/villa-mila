@@ -9,6 +9,7 @@ use App\Filament\Resources\Amenities\Schemas\AmenityForm;
 use App\Filament\Resources\Amenities\Tables\AmenitiesTable;
 use App\Models\Amenity;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +22,9 @@ class AmenityResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationLabel = 'Servicios';
+    protected static string|UnitEnum|null $navigationGroup = 'Configuración';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,5 +50,15 @@ class AmenityResource extends Resource
             'create' => CreateAmenity::route('/create'),
             'edit' => EditAmenity::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Servicio';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Servicios';
     }
 }

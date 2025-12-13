@@ -9,6 +9,7 @@ use App\Filament\Resources\Seasons\Schemas\SeasonForm;
 use App\Filament\Resources\Seasons\Tables\SeasonsTable;
 use App\Models\Season;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +22,10 @@ class SeasonResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationLabel = 'Temporadas';
+    protected static string|UnitEnum|null $navigationGroup = 'Configuración';
+
 
     public static function form(Schema $schema): Schema
     {
@@ -47,4 +52,16 @@ class SeasonResource extends Resource
             'edit' => EditSeason::route('/{record}/edit'),
         ];
     }
+
+    
+    public static function getModelLabel(): string
+    {
+        return 'Temporada';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Temporadas';
+    }
+
 }

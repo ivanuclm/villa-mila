@@ -23,16 +23,26 @@ class BookingsTable
                 TextColumn::make('arrival')->date()->label('Llegada')->sortable(),
                 TextColumn::make('departure')->date()->label('Salida')->sortable(),
                 TextColumn::make('guests')->label('Viajeros'),
-                TextColumn::make('status')->badge()->colors([
+                TextColumn::make('status')
+                ->label('Estado')
+                ->badge()
+                ->formatStateUsing(fn (string $state) => [
+                    'pending' => 'Pendiente',
+                    'hold' => 'Bloqueo',
+                    'confirmed' => 'Confirmada',
+                    'cancelled' => 'Cancelada',
+                ][$state] ?? $state)
+                ->colors([
                     'warning' => 'pending',
                     'info'    => 'hold',
                     'success' => 'confirmed',
                     'danger'  => 'cancelled',
-                ])->label('Estado'),
+                ]),
                 TextColumn::make('total')->money('eur')->label('Total'),
             ])
             ->filters([
                 Filters\SelectFilter::make('status')
+                    ->label('Estado')
                     ->options([
                         'pending'   => 'Pendiente',
                         'hold'      => 'Bloqueo',
@@ -58,6 +68,7 @@ class BookingsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('arrival', 'asc');
     }
 }

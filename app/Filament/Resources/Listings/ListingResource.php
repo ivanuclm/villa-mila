@@ -9,6 +9,7 @@ use App\Filament\Resources\Listings\Schemas\ListingForm;
 use App\Filament\Resources\Listings\Tables\ListingsTable;
 use App\Models\Listing;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +22,9 @@ class ListingResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationLabel = 'Alojamientos';
+    protected static string|UnitEnum|null $navigationGroup = 'Reservas';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,5 +50,15 @@ class ListingResource extends Resource
             'create' => CreateListing::route('/create'),
             'edit' => EditListing::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Alojamiento';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Alojamientos';
     }
 }
