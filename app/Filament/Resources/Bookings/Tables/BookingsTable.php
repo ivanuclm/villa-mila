@@ -15,6 +15,9 @@ use Filament\Tables\Filters;
 
 class BookingsTable
 {
+    public static function configure(Table $table): Table
+    {
+        return $table
             ->defaultSort('arrival')
             ->columns([
                 TextColumn::make('listing.name')
@@ -56,12 +59,26 @@ class BookingsTable
             ])
             ->filters([
                 Filters\SelectFilter::make('status')
+                    ->label('Estado')
                     ->options([
                         'pending'   => 'Pendiente',
                         'hold'      => 'Bloqueo',
                         'confirmed' => 'Confirmada',
                         'cancelled' => 'Cancelada',
                     ]),
+                Filters\Filter::make('arrival_between')
+                    ->form([
+                        FilterDatePicker::make('from')->label('Desde'),
+                        FilterDatePicker::make('until')->label('Hasta'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'] ?? null, fn ($q, $d) => $q->whereDate('arrival', '>=', $d))
+                            ->when($data['until'] ?? null, fn ($q, $d) => $q->whereDate('arrival', '<=', $d));
+                    })
+                    ->label('Llegadas entre'),
+            ])
+            ->recordActions([
                 ActionGroup::make([
                     EditAction::make()->label('Abrir ficha'),
                     Action::make('confirm')
@@ -91,6 +108,7 @@ class BookingsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('arrival', 'asc');
     }
 }
