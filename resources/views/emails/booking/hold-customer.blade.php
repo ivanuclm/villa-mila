@@ -5,7 +5,7 @@ Hola {{ $booking->customer_name }},
 
 Hemos recibido tu solicitud para **{{ $booking->listing->name ?? 'Villa Mila' }}**.
 
-Tu reserva está en estado **BLOQUEO (HOLD)**, pendiente de confirmación por parte de la propiedad.
+Tu reserva está en estado **PENDIENTE**, lo que significa que revisaremos la información y te escribiremos con los siguientes pasos.
 
 ---
 
@@ -34,7 +34,7 @@ Tu reserva está en estado **BLOQUEO (HOLD)**, pendiente de confirmación por pa
 
 ---
 
-En breve nos pondremos en contacto para confirmarla.
+En breve nos pondremos en contacto para confirmarla o solicitar información adicional.
 
 Gracias,  
 {{ config('app.name') }}

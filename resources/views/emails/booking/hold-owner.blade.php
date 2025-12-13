@@ -1,5 +1,5 @@
 <x-mail::message>
-# Nueva solicitud de reserva (HOLD)
+# Nueva solicitud de reserva
 
 Has recibido una nueva solicitud de reserva para **{{ $booking->listing->name ?? 'Villa Mila' }}**.
 
@@ -24,7 +24,7 @@ Has recibido una nueva solicitud de reserva para **{{ $booking->listing->name ??
 - **Llegada:** {{ $booking->arrival->format('Y-m-d') }}
 - **Salida:** {{ $booking->departure->format('Y-m-d') }}
 - **Huéspedes:** {{ $booking->guests }}
-- **Estado:** HOLD
+- **Estado:** Pendiente
 
 ---
 

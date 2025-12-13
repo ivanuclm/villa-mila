@@ -180,7 +180,7 @@ class PublicListingController extends Controller
             'arrival'           => $arrival,
             'departure'         => $departure,
             'guests'            => (int) $data['guests'],
-            'status'            => BookingStatus::Hold->value,
+            'status'            => BookingStatus::Pending->value,
             'total'             => $quote['total'],   // total final
             'source'            => 'web',
             'notes'             => $data['notes'] ?? null,

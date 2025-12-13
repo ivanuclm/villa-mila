@@ -21,7 +21,7 @@ class PublicBookingHoldCustomerMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tu solicitud de reserva está en revisión (HOLD)',
+            subject: 'Tu solicitud de reserva está pendiente de revisión',
         );
     }
 

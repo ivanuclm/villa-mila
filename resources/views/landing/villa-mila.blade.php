@@ -284,6 +284,39 @@
             display:block;
         }
 
+        /* ========== SECCIÓN RESERVA ========== */
+
+        .booking-section {
+            padding: 5rem 7vw;
+            background: linear-gradient(135deg, #eef2ff 0%, #ffffff 60%);
+        }
+
+        .booking-section__inner {
+            max-width: 1120px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        .booking-section__intro h2 {
+            font-size: clamp(2rem, 3vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .booking-section__intro p {
+            font-size: 1rem;
+            color: var(--vm-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 980px) {
+            .booking-section__inner {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* ========== CÓMO LLEGAR ========== */
 
         .map-card {
@@ -343,8 +376,9 @@
         <a href="#galeria">Galería</a>
         <a href="#entorno">Entorno</a>
         <a href="#como-llegar">Cómo llegar</a>
+        <a href="#reserva">Reserva</a>
     </nav>
-    <a class="navbar__cta" href="{{ route('public.booking') }}">
+    <a class="navbar__cta" href="#reserva">
         Reservar ahora
     </a>
 </header>
@@ -482,6 +516,23 @@
                     Ir a la reserva
                 </a>
             </div>
+        </div>
+    </section>
+
+    {{-- RESERVA --}}
+    <section class="booking-section" id="reserva">
+        <div class="booking-section__inner">
+            <div class="booking-section__intro">
+                <p class="section__kicker">DISPONIBILIDAD Y TARIFAS</p>
+                <h2>Reserva directa con Milagros</h2>
+                <p>
+                    Selecciona fechas en el calendario, calcula tu presupuesto al instante y envía
+                    la solicitud. Te confirmaremos por correo o teléfono con los siguientes pasos,
+                    incluyendo contrato, pago y registro de viajeros.
+                </p>
+            </div>
+            @php($bookingListing = $listing->only(['slug','max_guests','name','address','license_number']))
+            @include('listings.partials.booking-widget', ['listing' => $bookingListing, 'variant' => 'landing'])
         </div>
     </section>
 

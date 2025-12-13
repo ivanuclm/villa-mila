@@ -7,6 +7,7 @@ use App\Filament\Resources\Bookings\Pages\EditBooking;
 use App\Filament\Resources\Bookings\Pages\ListBookings;
 use App\Filament\Resources\Bookings\Schemas\BookingForm;
 use App\Filament\Resources\Bookings\Tables\BookingsTable;
+use App\Filament\Resources\Bookings\RelationManagers;
 use App\Models\Booking;
 use BackedEnum;
 use UnitEnum;
@@ -39,7 +40,7 @@ class BookingResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\GuestEntriesRelationManager::class,
         ];
     }
 
