@@ -1,14 +1,8 @@
-<x-filament::section>
+<x-filament::section :contained="false" class="w-full">
     <div class="flex items-center justify-between mb-4">
         <div>
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-50">Calendario rápido</h2>
             <p class="text-sm text-gray-600 dark:text-gray-300">{{ $monthLabel }} · Resumen visual de estancias</p>
-        </div>
-        <div class="flex gap-2 text-xs sm:text-sm">
-            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-amber-800">● Pendiente</span>
-            <span class="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-1 text-sky-800">● Bloqueo</span>
-            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-emerald-800">● Confirmada</span>
-            <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-1 text-rose-800">● Cancelada</span>
         </div>
     </div>
 
@@ -46,9 +40,6 @@
                                     <span class="truncate">{{ $booking['name'] }}</span>
                                     <span class="text-[10px] uppercase">{{ $booking['label'] }}</span>
                                 </div>
-                                @if ($booking['listing'])
-                                    <div class="text-[10px] text-gray-700 dark:text-gray-200">{{ $booking['listing'] }}</div>
-                                @endif
                             </div>
                         @endforeach
                     </div>

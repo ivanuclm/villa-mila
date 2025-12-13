@@ -9,7 +9,7 @@ use Filament\Widgets\Widget;
 
 class BookingsCalendarWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.bookings-calendar-widget';
+    protected string $view = 'filament.widgets.bookings-calendar-widget';
 
     protected int|string|array $columnSpan = 'full';
 

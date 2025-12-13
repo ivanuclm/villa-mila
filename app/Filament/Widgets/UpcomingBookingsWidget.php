@@ -6,6 +6,8 @@ use App\Models\Booking;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class UpcomingBookingsWidget extends BaseWidget
 {
@@ -16,7 +18,7 @@ class UpcomingBookingsWidget extends BaseWidget
         return 'Próximas reservas';
     }
 
-    protected function getTableQuery()
+    protected function getTableQuery(): Builder|Relation|null
     {
         return Booking::query()
             ->whereDate('departure', '>=', now())
