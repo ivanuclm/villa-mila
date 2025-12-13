@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Carbon\CarbonPeriod;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PublicBookingHoldCustomerMail;
+use App\Mail\PublicBookingHoldOwnerMail;
+
+
 class PublicListingController extends Controller
 {
     public function show(Listing $listing)
@@ -181,7 +186,20 @@ class PublicListingController extends Controller
             'terms_accepted_at' => now(),
         ]);
 
-        // 4) TODO (siguiente paso): mails a cliente y propietaria
+        // 4) mails a cliente y propietaria
+
+        $booking = $booking->fresh(['listing']); // una vez y listo
+
+        Mail::to($booking->customer_email)
+            ->send(new PublicBookingHoldCustomerMail($booking, $quote));
+
+        $ownerEmail = config('villa.owner_email');
+        if ($ownerEmail) {
+            $adminUrl = url("/admin/bookings/{$booking->id}/edit"); // ajusta si tu ruta Filament difiere
+            Mail::to($ownerEmail)
+                ->send(new PublicBookingHoldOwnerMail($booking, $quote, $adminUrl));
+        }
+
 
         return response()->json([
             'ok'      => true,
