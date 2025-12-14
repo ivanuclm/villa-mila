@@ -429,7 +429,9 @@
                         </li>
                         <li>
                             <strong>Contrato digital:</strong>
-                            @if ($flow['contractUrl'])
+                            @if ($booking->contract_document_url)
+                                <a href="{{ $booking->contract_document_url }}" target="_blank" rel="noopener">Descargar contrato firmado</a>
+                            @elseif ($flow['contractUrl'])
                                 <a href="{{ $flow['contractUrl'] }}" target="_blank" rel="noopener">Ver borrador</a>
                             @else
                                 Lo firmaremos junto con el registro de viajeros.

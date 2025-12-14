@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 class GuestEntriesRelationManager extends RelationManager
 {
     protected static string $relationship = 'guestEntries';
+    protected static ?string $title = 'Personas viajeras';
 
     public function form(Schema $schema): Schema
     {
@@ -50,6 +51,7 @@ class GuestEntriesRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->label('Añadir viajero')
                     ->visible(fn () => $this->ownerRecord->guestEntries()->count() < $this->ownerRecord->guests),
             ])
             ->actions([

@@ -4,14 +4,17 @@ namespace App\Filament\Resources\Bookings\Tables;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Services\ContractDocumentGenerator;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker as FilterDatePicker;
+use Filament\Notifications\Notification;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters;
 
 class BookingsTable
@@ -66,6 +69,23 @@ class BookingsTable
                     })
                     ->label('Estado'),
                 TextColumn::make('total')->money('eur')->label('Total'),
+                IconColumn::make('payment_confirmed')
+                    ->label('Pago')
+                    ->tooltip(fn (Booking $record) => $record->payment_received_at ? 'Confirmado el ' . $record->payment_received_at->format('d/m H:i') : 'Aún pendiente')
+                    ->state(fn (Booking $record) => filled($record->payment_received_at))
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-clock')
+                    ->trueColor('success')
+                    ->falseColor('warning'),
+                TextColumn::make('operations_checklist')
+                    ->label('Checklist')
+                    ->state(function (Booking $record) {
+                        $count = count($record->operations_checklist ?? []);
+
+                        return "{$count}/4";
+                    })
+                    ->badge()
+                    ->color(fn (string $state) => str_starts_with($state, '4/') ? 'success' : 'gray'),
             ])
             ->filters([
                 Filters\SelectFilter::make('status')
@@ -86,6 +106,24 @@ class BookingsTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()->label('Abrir ficha'),
+                    Action::make('generateContract')
+                        ->label(fn (Booking $record) => filled($record->contract_document_path) ? 'Actualizar contrato' : 'Generar contrato')
+                        ->icon('heroicon-o-document-text')
+                        ->requiresConfirmation()
+                        ->action(function (Booking $record) {
+                            app(ContractDocumentGenerator::class)->generate($record);
+
+                            Notification::make()
+                                ->title('Contrato actualizado')
+                                ->success()
+                                ->body('Hemos generado la versión más reciente del contrato.')
+                                ->send();
+                        }),
+                    Action::make('viewContract')
+                        ->label('Ver contrato')
+                        ->icon('heroicon-o-eye')
+                        ->url(fn (Booking $record) => $record->contract_document_url, true)
+                        ->visible(fn (Booking $record) => filled($record->contract_document_path)),
                     Action::make('markPending')
                         ->label('Volver a pendiente')
                         ->icon('heroicon-o-arrow-uturn-left')
@@ -110,21 +148,62 @@ class BookingsTable
                             BookingStatus::InStay->value,
                             BookingStatus::Completed->value,
                         ], true))
-                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Confirmed->value])),
+                        ->action(function (Booking $record) {
+                            if (! $record->payment_received_at) {
+                                Notification::make()
+                                    ->title('Falta confirmar el pago')
+                                    ->body('Registra la fecha de pago recibido antes de confirmar la reserva.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $record->update(['status' => BookingStatus::Confirmed->value]);
+                        }),
                     Action::make('markInStay')
                         ->label('Registrar check-in')
                         ->icon('heroicon-o-arrow-right-circle')
                         ->color('primary')
                         ->requiresConfirmation()
                         ->visible(fn (Booking $record) => $record->status?->value === BookingStatus::Confirmed->value)
-                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::InStay->value])),
+                        ->action(function (Booking $record) {
+                            $checklist = $record->operations_checklist ?? [];
+                            $required = ['traveler_forms', 'contract_signed'];
+                            $missing = array_diff($required, $checklist);
+
+                            if (! empty($missing)) {
+                                Notification::make()
+                                    ->title('Completa las tareas previas')
+                                    ->body('Necesitas completar las fichas de viajeros y el contrato antes de registrar el check-in.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $record->update(['status' => BookingStatus::InStay->value]);
+                        }),
                     Action::make('markCompleted')
                         ->label('Finalizar estancia')
                         ->icon('heroicon-o-flag')
                         ->color('gray')
                         ->requiresConfirmation()
                         ->visible(fn (Booking $record) => $record->status?->value === BookingStatus::InStay->value)
-                        ->action(fn (Booking $record) => $record->update(['status' => BookingStatus::Completed->value])),
+                        ->action(function (Booking $record) {
+                            $checklist = $record->operations_checklist ?? [];
+                            if (! in_array('cleaning_notified', $checklist, true)) {
+                                Notification::make()
+                                    ->title('Confirma limpieza/mantenimiento')
+                                    ->body('Marca la tarea "Limpieza / mantenimiento avisado" antes de cerrar la reserva.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $record->update(['status' => BookingStatus::Completed->value]);
+                        }),
                     Action::make('cancel')
                         ->label('Cancelar')
                         ->icon('heroicon-o-x-circle')
