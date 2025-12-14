@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 
 class ListingForm
 {
@@ -49,6 +50,16 @@ class ListingForm
                         Textarea::make('description.es')
                             ->label('Descripción (ESPAÑOL)')
                             ->rows(4)
+                            ->columnSpanFull(),
+
+                        FileUpload::make('cover_image_path')
+                            ->label('Imagen de portada')
+                            ->disk('public')
+                            ->directory('listings/covers')
+                            ->image()
+                            ->imageEditor()
+                            ->imagePreviewHeight('200')
+                            ->helperText('Se usará en correos, landing y portal del huésped.')
                             ->columnSpanFull(),
 
                         TextInput::make('address')

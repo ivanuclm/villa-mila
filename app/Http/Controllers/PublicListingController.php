@@ -30,7 +30,8 @@ class PublicListingController extends Controller
                 'max_guests',
                 'description',
                 'lat',
-                'lng'
+                'lng',
+                'cover_image_path',
             ]),
         ]);
     }

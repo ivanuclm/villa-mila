@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Booking;
+use App\Support\BookingFlow;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -18,13 +19,28 @@ class BookingStatusChangedMail extends Mailable
         public ?string $previousStatus = null,
         public bool $isOwner = false,
     ) {
+        $this->booking->loadMissing('listing');
+        $this->coverUrl = $this->booking->listing?->cover_url;
+        $this->portalUrl = $this->booking->public_access_token
+            ? route('guest.portal.show', $this->booking->public_access_token)
+            : null;
+        $this->flow = BookingFlow::context($this->booking);
+        $this->adminUrl = url("/admin/bookings/{$this->booking->id}/edit");
     }
+
+    public ?string $coverUrl = null;
+    public ?string $portalUrl = null;
+    public array $flow = [];
+    public ?string $adminUrl = null;
 
     public function envelope(): Envelope
     {
+        $listingName = $this->booking->listing->name ?? 'Villa Mila';
+        $statusLabel = $this->booking->status->label();
+
         $subject = $this->isOwner
-            ? "Estado actualizado: {$this->booking->status->label()}"
-            : "Tu reserva ahora está {$this->booking->status->label()}";
+            ? "[$listingName] {$this->booking->customer_name} ahora está {$statusLabel}"
+            : "Tu reserva en {$listingName} está {$statusLabel}";
 
         return new Envelope(
             subject: $subject,
@@ -39,6 +55,10 @@ class BookingStatusChangedMail extends Mailable
                 'booking' => $this->booking,
                 'previousStatus' => $this->previousStatus,
                 'isOwner' => $this->isOwner,
+                'coverUrl' => $this->coverUrl,
+                'portalUrl' => $this->portalUrl,
+                'flow' => $this->flow,
+                'adminUrl' => $this->adminUrl,
             ],
         );
     }

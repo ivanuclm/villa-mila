@@ -17,7 +17,7 @@ class LandingController extends Controller
     public function home()
     {
         $listing = $this->villa();
-        $heroImage = asset('images/PORTADA.jpg');
+        $heroImage = $listing->cover_url ?? asset('images/PORTADA.jpg');
 
         return view('landing.villa-mila', [
             'listing' => $listing,
@@ -33,7 +33,7 @@ class LandingController extends Controller
         // Reutilizamos el mismo formato que usabas en show.blade.php
         return view('listings.show', [
             'listing' => $listing->only([
-                'id','name','slug','address','license_number','max_guests','description','lat','lng'
+                'id','name','slug','address','license_number','max_guests','description','lat','lng','cover_image_path'
             ]),
         ]);
     }

@@ -311,9 +311,54 @@
             line-height: 1.6;
         }
 
+        .booking-follow-card {
+            margin-top: 1.75rem;
+            padding: 1.25rem;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px dashed rgba(79,70,229,.35);
+            box-shadow: 0 12px 24px rgba(15,23,42,.08);
+        }
+
+        .booking-follow-card__form {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .booking-follow-card__form input {
+            flex: 1;
+            border-radius: 12px;
+            border: 1px solid rgba(148,163,184,.6);
+            padding: 0.65rem;
+            font-size: 0.95rem;
+        }
+
+        .booking-follow-card__form button {
+            border-radius: 12px;
+            border: none;
+            background: var(--vm-brand);
+            color: #fff;
+            font-weight: 600;
+            padding: 0.65rem 1.2rem;
+            cursor: pointer;
+        }
+
+        .booking-follow-card small {
+            display: block;
+            margin-top: 0.5rem;
+            color: var(--vm-muted);
+        }
+
         @media (max-width: 980px) {
             .booking-section__inner {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .booking-follow-card__form {
+                flex-direction: column;
             }
         }
 
@@ -530,6 +575,17 @@
                     la solicitud. Te confirmaremos por correo o teléfono con los siguientes pasos,
                     incluyendo contrato, pago y registro de viajeros.
                 </p>
+                <div class="booking-follow-card">
+                    <p style="margin:0;font-weight:600;">¿Ya hiciste una solicitud?</p>
+                    <p style="margin:0.25rem 0 0 0; color:var(--vm-muted); font-size:.9rem;">
+                        Introduce el código del correo para abrir tu portal y seguir el estado.
+                    </p>
+                    <form id="portalLookupForm" class="booking-follow-card__form">
+                        <input type="text" id="portalLookupToken" placeholder="Ej: dbdca467-6081-4fe6-8379-02ecefc6da65" required>
+                        <button type="submit">Abrir portal</button>
+                    </form>
+                    <small>El enlace y el código aparecen en todos los correos de la reserva.</small>
+                </div>
             </div>
             @php($bookingListing = $listing->only(['slug','max_guests','name','address','license_number']))
             @include('listings.partials.booking-widget', ['listing' => $bookingListing, 'variant' => 'landing'])
@@ -587,6 +643,18 @@
             if (offset > strip.scrollWidth) offset = 0;
             strip.scrollTo({ left: offset, behavior: 'smooth' });
         }, 5000);
+    }
+
+    const portalLookupForm = document.getElementById('portalLookupForm');
+    if (portalLookupForm) {
+        portalLookupForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const tokenInput = document.getElementById('portalLookupToken');
+            const token = tokenInput.value.trim();
+            if (!token) return;
+
+            window.location.href = `/mi-reserva/${encodeURIComponent(token)}`;
+        });
     }
 </script>
 </body>
