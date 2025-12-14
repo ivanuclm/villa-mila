@@ -7,6 +7,7 @@ use App\Models\BookingGuest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class GuestPortalController extends Controller
 {
@@ -32,10 +33,19 @@ class GuestPortalController extends Controller
         }
 
         $data = $request->validate([
-            'full_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'first_surname' => ['required', 'string', 'max:255'],
+            'second_surname' => ['nullable', 'string', 'max:255'],
+            'full_name' => ['nullable', 'string', 'max:255'],
+            'document_type' => ['nullable', Rule::in(['dni', 'nie', 'passport', 'other'])],
             'document_number' => ['nullable', 'string', 'max:100'],
+            'document_support_number' => ['nullable', 'string', 'max:100'],
+            'gender' => ['nullable', Rule::in(['M', 'H', 'X'])],
             'nationality' => ['nullable', 'string', 'max:100'],
+            'birth_country' => ['nullable', 'string', 'max:100'],
             'birthdate' => ['nullable', 'date'],
+            'is_minor' => ['nullable', 'boolean'],
+            'kinship' => ['nullable', 'string', 'max:100'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'signature_data' => ['nullable', 'string'],
@@ -47,10 +57,19 @@ class GuestPortalController extends Controller
         }
 
         $booking->guestEntries()->create([
-            'full_name' => $data['full_name'],
+            'first_name' => $data['first_name'],
+            'first_surname' => $data['first_surname'],
+            'second_surname' => $data['second_surname'] ?? null,
+            'full_name' => $data['full_name'] ?? $this->composeFullName($data),
+            'document_type' => $data['document_type'] ?? null,
             'document_number' => $data['document_number'] ?? null,
+            'document_support_number' => $data['document_support_number'] ?? null,
+            'gender' => $data['gender'] ?? null,
             'nationality' => $data['nationality'] ?? null,
+            'birth_country' => $data['birth_country'] ?? null,
             'birthdate' => $data['birthdate'] ?? null,
+            'is_minor' => (bool) ($data['is_minor'] ?? false),
+            'kinship' => $data['kinship'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'signature_path' => $signaturePath,
@@ -66,15 +85,40 @@ class GuestPortalController extends Controller
         abort_unless($guest->booking_id === $booking->id, 404);
 
         $data = $request->validate([
-            'full_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'first_surname' => ['required', 'string', 'max:255'],
+            'second_surname' => ['nullable', 'string', 'max:255'],
+            'full_name' => ['nullable', 'string', 'max:255'],
+            'document_type' => ['nullable', Rule::in(['dni', 'nie', 'passport', 'other'])],
             'document_number' => ['nullable', 'string', 'max:100'],
+            'document_support_number' => ['nullable', 'string', 'max:100'],
+            'gender' => ['nullable', Rule::in(['M', 'H', 'X'])],
             'nationality' => ['nullable', 'string', 'max:100'],
+            'birth_country' => ['nullable', 'string', 'max:100'],
             'birthdate' => ['nullable', 'date'],
+            'is_minor' => ['nullable', 'boolean'],
+            'kinship' => ['nullable', 'string', 'max:100'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $guest->update($data);
+        $guest->update([
+            'first_name' => $data['first_name'],
+            'first_surname' => $data['first_surname'],
+            'second_surname' => $data['second_surname'] ?? null,
+            'full_name' => $data['full_name'] ?? $this->composeFullName($data),
+            'document_type' => $data['document_type'] ?? null,
+            'document_number' => $data['document_number'] ?? null,
+            'document_support_number' => $data['document_support_number'] ?? null,
+            'gender' => $data['gender'] ?? null,
+            'nationality' => $data['nationality'] ?? null,
+            'birth_country' => $data['birth_country'] ?? null,
+            'birthdate' => $data['birthdate'] ?? null,
+            'is_minor' => (bool) ($data['is_minor'] ?? false),
+            'kinship' => $data['kinship'] ?? null,
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+        ]);
 
         return back()->with('portal_status', 'Datos del viajero actualizados.');
     }
@@ -112,5 +156,16 @@ class GuestPortalController extends Controller
         Storage::disk('public')->put($path, $binary);
 
         return $path;
+    }
+
+    protected function composeFullName(array $data): ?string
+    {
+        $parts = array_filter([
+            $data['first_name'] ?? null,
+            $data['first_surname'] ?? null,
+            $data['second_surname'] ?? null,
+        ]);
+
+        return $parts ? implode(' ', $parts) : null;
     }
 }

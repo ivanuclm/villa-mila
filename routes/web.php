@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GuestPortalController;
 use App\Http\Controllers\PublicListingController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\ReservationController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -13,9 +14,9 @@ use App\Http\Controllers\LandingController;
 Route::get('/', [LandingController::class, 'home'])
     ->name('home');
 
-// Página de reserva (usa el widget que ya tienes)
-Route::get('/reserva', [LandingController::class, 'booking'])
-    ->name('public.booking');
+Route::get('/reservar', [ReservationController::class, 'create'])->name('reservations.create');
+Route::post('/reservar', [ReservationController::class, 'store'])->name('reservations.store');
+Route::get('/reservar/confirmada/{token}', [ReservationController::class, 'success'])->name('reservations.success');
 
 // (Opcional) index multi-inmueble para tu futuro proyecto
 Route::get('/demo/listings', [PublicListingController::class, 'index'])

@@ -307,6 +307,17 @@
         $coverUrl = $booking->listing?->cover_url;
         $portalUrl = $booking->public_access_token ? route('guest.portal.show', $booking->public_access_token) : null;
         $guestLimitReached = $booking->guestEntries->count() >= $booking->guests;
+        $documentTypes = [
+            'dni' => 'DNI',
+            'nie' => 'NIE',
+            'passport' => 'Pasaporte',
+            'other' => 'Otro',
+        ];
+        $genderOptions = [
+            'M' => 'Mujer',
+            'H' => 'Hombre',
+            'X' => 'Otro / No binario',
+        ];
     @endphp
     <div class="portal-shell">
         <div class="portal-header">
@@ -461,17 +472,33 @@
                 @endif
                 <div class="guest-list">
                     @forelse ($booking->guestEntries as $guest)
+                        @php
+                            $displayName = $guest->full_name ?: trim(implode(' ', array_filter([$guest->first_name, $guest->first_surname, $guest->second_surname])));
+                            $docTypeLabel = $guest->document_type ? ($documentTypes[$guest->document_type] ?? strtoupper($guest->document_type)) : null;
+                        @endphp
                         <div class="guest-card">
                             <header>
                                 <div>
-                                    <p style="margin:0;font-weight:600;">{{ $guest->full_name }}</p>
+                                    <p style="margin:0;font-weight:600;">{{ $displayName ?: 'Sin nombre' }}</p>
                                     <p style="margin:0;color:#475569;font-size:.9rem;">
-                                        Documento: {{ $guest->document_number ?: '—' }} · Nacionalidad: {{ $guest->nationality ?: '—' }}
+                                        Documento: {{ $docTypeLabel ? $docTypeLabel . ' · ' : '' }}{{ $guest->document_number ?: '—' }}
+                                        @if($guest->document_support_number)
+                                            · Nº soporte: {{ $guest->document_support_number }}
+                                        @endif
                                     </p>
+                                    <p style="margin:0;color:#475569;font-size:.9rem;">
+                                        Nacionalidad: {{ $guest->nationality ?: '—' }} · País nacimiento: {{ $guest->birth_country ?: '—' }}
+                                    </p>
+                                    <p style="margin:0;color:#475569;font-size:.9rem;">
+                                        Fecha nacimiento: {{ $guest->birthdate?->format('d/m/Y') ?: '—' }} · Sexo: {{ $guest->gender ? ($genderOptions[$guest->gender] ?? $guest->gender) : '—' }} · Menor: {{ $guest->is_minor ? 'Sí' : 'No' }}
+                                    </p>
+                                    @if($guest->kinship)
+                                        <p style="margin:0;color:#475569;font-size:.9rem;">Parentesco: {{ $guest->kinship }}</p>
+                                    @endif
                                     <p style="margin:0;color:#94a3b8;font-size:.85rem;">Añadido el {{ $guest->created_at->format('d/m/Y') }}</p>
                                 </div>
                                 @if ($guest->signature_path)
-                                    <img src="{{ Storage::disk('public')->url($guest->signature_path) }}" alt="Firma de {{ $guest->full_name }}">
+                                    <img src="{{ Storage::disk('public')->url($guest->signature_path) }}" alt="Firma de {{ $displayName }}">
                                 @endif
                             </header>
 
@@ -482,20 +509,69 @@
                                         @csrf
                                         @method('PATCH')
                                         <div class="field">
-                                            <label>Nombre completo</label>
-                                            <input type="text" name="full_name" value="{{ $guest->full_name }}" required>
+                                            <label>Nombre</label>
+                                            <input type="text" name="first_name" value="{{ $guest->first_name }}" required>
+                                        </div>
+                                        <div class="field">
+                                            <label>Primer apellido</label>
+                                            <input type="text" name="first_surname" value="{{ $guest->first_surname }}" required>
+                                        </div>
+                                        <div class="field">
+                                            <label>Segundo apellido</label>
+                                            <input type="text" name="second_surname" value="{{ $guest->second_surname }}">
+                                        </div>
+                                        <div class="field">
+                                            <label>Nombre completo (opcional)</label>
+                                            <input type="text" name="full_name" value="{{ $guest->full_name }}">
+                                        </div>
+                                        <div class="field">
+                                            <label>Tipo de documento</label>
+                                            <select name="document_type">
+                                                <option value="">Selecciona</option>
+                                                @foreach($documentTypes as $key => $label)
+                                                    <option value="{{ $key }}" @selected($guest->document_type === $key)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                         <div class="field">
                                             <label>Número de documento</label>
                                             <input type="text" name="document_number" value="{{ $guest->document_number }}">
                                         </div>
                                         <div class="field">
+                                            <label>Nº de soporte</label>
+                                            <input type="text" name="document_support_number" value="{{ $guest->document_support_number }}">
+                                        </div>
+                                        <div class="field">
+                                            <label>Sexo</label>
+                                            <select name="gender">
+                                                <option value="">Selecciona</option>
+                                                @foreach($genderOptions as $key => $label)
+                                                    <option value="{{ $key }}" @selected($guest->gender === $key)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="field">
                                             <label>Nacionalidad</label>
                                             <input type="text" name="nationality" value="{{ $guest->nationality }}">
                                         </div>
                                         <div class="field">
+                                            <label>País de nacimiento</label>
+                                            <input type="text" name="birth_country" value="{{ $guest->birth_country }}">
+                                        </div>
+                                        <div class="field">
                                             <label>Fecha de nacimiento</label>
                                             <input type="date" name="birthdate" value="{{ $guest->birthdate?->format('Y-m-d') }}">
+                                        </div>
+                                        <div class="field">
+                                            <label>¿Es menor?</label>
+                                            <select name="is_minor">
+                                                <option value="0" @selected(! $guest->is_minor)>No</option>
+                                                <option value="1" @selected($guest->is_minor)>Sí</option>
+                                            </select>
+                                        </div>
+                                        <div class="field">
+                                            <label>Parentesco</label>
+                                            <input type="text" name="kinship" value="{{ $guest->kinship }}">
                                         </div>
                                         <div class="field">
                                             <label>Email</label>
@@ -533,20 +609,65 @@
                     @csrf
                     <fieldset style="border:none;padding:0;margin:0;" @if($guestLimitReached) disabled class="fieldset-disabled" @endif>
                         <div class="field">
-                            <label>Nombre completo</label>
-                            <input type="text" name="full_name" required>
+                            <label>Nombre</label>
+                            <input type="text" name="first_name" required>
+                        </div>
+                        <div class="field">
+                            <label>Primer apellido</label>
+                            <input type="text" name="first_surname" required>
+                        </div>
+                        <div class="field">
+                            <label>Segundo apellido</label>
+                            <input type="text" name="second_surname">
+                        </div>
+                        <div class="field">
+                            <label>Tipo de documento</label>
+                            <select name="document_type">
+                                <option value="">Selecciona</option>
+                                @foreach($documentTypes as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="field">
                             <label>Número de documento</label>
                             <input type="text" name="document_number">
                         </div>
                         <div class="field">
+                            <label>Nº de soporte</label>
+                            <input type="text" name="document_support_number">
+                        </div>
+                        <div class="field">
+                            <label>Sexo</label>
+                            <select name="gender">
+                                <option value="">Selecciona</option>
+                                @foreach($genderOptions as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="field">
                             <label>Nacionalidad</label>
                             <input type="text" name="nationality">
                         </div>
                         <div class="field">
+                            <label>País de nacimiento</label>
+                            <input type="text" name="birth_country">
+                        </div>
+                        <div class="field">
                             <label>Fecha de nacimiento</label>
                             <input type="date" name="birthdate">
+                        </div>
+                        <div class="field">
+                            <label>¿Es menor?</label>
+                            <select name="is_minor">
+                                <option value="0" selected>No</option>
+                                <option value="1">Sí</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Parentesco (si es menor)</label>
+                            <input type="text" name="kinship">
                         </div>
                         <div class="field">
                             <label>Email (opcional)</label>

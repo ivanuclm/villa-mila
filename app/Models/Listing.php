@@ -26,6 +26,17 @@ class Listing extends Model implements HasMedia
         'checkin_from',
         'checkout_until',
         'cover_image_path',
+        'contract_owner_name',
+        'contract_owner_document',
+        'contract_owner_address',
+        'contract_full_text',
+        'cadastral_reference',
+        'municipal_registry_code',
+        'clm_registry_number',
+        'nra_registry_number',
+        'ccaa_license_code',
+        'extra_beds',
+        'cribs',
     ];
     public array $translatable = ['description'];
 

@@ -30,6 +30,21 @@ class StorePublicBookingRequest extends FormRequest
             'customer_name'  => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:50'],
+
+            'customer_first_name' => ['required', 'string', 'max:255'],
+            'customer_first_surname' => ['required', 'string', 'max:255'],
+            'customer_second_surname' => ['nullable', 'string', 'max:255'],
+            'customer_document_type' => ['required', 'in:dni,nie,passport,other'],
+            'customer_document_number' => ['required', 'string', 'max:100'],
+            'customer_document_support_number' => ['nullable', 'string', 'max:100'],
+            'customer_birthdate' => ['required', 'date', 'before:today'],
+            'customer_birth_country' => ['required', 'string', 'max:120'],
+            'customer_address_street' => ['required', 'string', 'max:255'],
+            'customer_address_number' => ['nullable', 'string', 'max:50'],
+            'customer_address_city' => ['required', 'string', 'max:120'],
+            'customer_address_province' => ['required', 'string', 'max:120'],
+            'customer_address_country' => ['required', 'string', 'max:120'],
+
             'notes'          => ['nullable', 'string', 'max:2000'],
 
             // checkbox de términos → boolean + accepted

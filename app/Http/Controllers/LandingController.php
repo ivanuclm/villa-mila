@@ -25,16 +25,4 @@ class LandingController extends Controller
         ]);
     }
 
-    // Página/sección de reserva reutilizando el widget actual
-    public function booking()
-    {
-        $listing = $this->villa();
-
-        // Reutilizamos el mismo formato que usabas en show.blade.php
-        return view('listings.show', [
-            'listing' => $listing->only([
-                'id','name','slug','address','license_number','max_guests','description','lat','lng','cover_image_path'
-            ]),
-        ]);
-    }
 }

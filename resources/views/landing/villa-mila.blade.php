@@ -423,7 +423,7 @@
         <a href="#como-llegar">Cómo llegar</a>
         <a href="#reserva">Reserva</a>
     </nav>
-    <a class="navbar__cta" href="#reserva">
+    <a class="navbar__cta" href="{{ route('reservations.create') }}">
         Reservar ahora
     </a>
 </header>
@@ -445,7 +445,7 @@
         </p>
 
         <div class="hero__cta-row">
-            <a class="btn-primary" href="{{ route('public.booking') }}">
+            <a class="btn-primary" href="{{ route('reservations.create') }}">
                 Reservar ahora
             </a>
             <a class="btn-ghost" href="#sobre">
@@ -571,9 +571,9 @@
                 <p class="section__kicker">DISPONIBILIDAD Y TARIFAS</p>
                 <h2>Reserva directa con Milagros</h2>
                 <p>
-                    Selecciona fechas en el calendario, calcula tu presupuesto al instante y envía
-                    la solicitud. Te confirmaremos por correo o teléfono con los siguientes pasos,
-                    incluyendo contrato, pago y registro de viajeros.
+                    Indica tus fechas y número de huéspedes y te llevaremos a un formulario completo
+                    donde podrás revisar el presupuesto, rellenar tus datos como representante y enviar
+                    la solicitud oficial. Después recibirás un correo con el enlace a tu portal privado.
                 </p>
                 <div class="booking-follow-card">
                     <p style="margin:0;font-weight:600;">¿Ya hiciste una solicitud?</p>
@@ -587,8 +587,17 @@
                     <small>El enlace y el código aparecen en todos los correos de la reserva.</small>
                 </div>
             </div>
-            @php($bookingListing = $listing->only(['slug','max_guests','name','address','license_number']))
-            @include('listings.partials.booking-widget', ['listing' => $bookingListing, 'variant' => 'landing'])
+            <div class="booking-follow-card" style="align-self:stretch;">
+                <h3 style="margin-top:0;">Nueva solicitud</h3>
+                <p style="color:var(--vm-muted); font-size:.95rem; line-height:1.5;">
+                    Pasa al formulario de reserva para seleccionar fechas en el calendario, ver un presupuesto
+                    orientativo y proporcionar tus datos de contacto y facturación.
+                </p>
+                <a class="btn-primary" href="{{ route('reservations.create') }}" style="width:100%; justify-content:center;">
+                    Ir al formulario de reserva
+                </a>
+                <small>El proceso se completa online: datos, contrato y registro oficial de viajeros.</small>
+            </div>
         </div>
     </section>
 

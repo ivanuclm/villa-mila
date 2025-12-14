@@ -85,6 +85,50 @@ class ListingForm
                 Textarea::make('gallery_notes')
                     ->helperText('Más adelante cambiaremos esto por un uploader con Media Library.')
                     ->columnSpanFull(),
+
+                Section::make('Contrato y documentación legal')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('contract_owner_name')
+                            ->label('Nombre completo del propietario para el contrato')
+                            ->maxLength(255),
+                        TextInput::make('contract_owner_document')
+                            ->label('Documento del propietario (DNI, NIE, etc.)')
+                            ->maxLength(255),
+                        TextInput::make('contract_owner_address')
+                            ->label('Domicilio a efectos de notificación')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Textarea::make('contract_full_text')
+                            ->label('Texto completo del contrato')
+                            ->rows(20)
+                            ->helperText('Puedes personalizar la plantilla oficial de Milagros. Si lo dejas vacío se usará la definida en config/villa.php.')
+                            ->default(config('villa.contract_template'))
+                            ->columnSpanFull(),
+                        TextInput::make('cadastral_reference')
+                            ->label('Referencia catastral')
+                            ->maxLength(255),
+                        TextInput::make('municipal_registry_code')
+                            ->label('Código seguro verificación municipal')
+                            ->maxLength(255),
+                        TextInput::make('clm_registry_number')
+                            ->label('Registro CLM (Empresas y Establecimientos)')
+                            ->maxLength(255),
+                        TextInput::make('nra_registry_number')
+                            ->label('NRA registro único de arrendamiento')
+                            ->maxLength(255),
+                        TextInput::make('ccaa_license_code')
+                            ->label('Nº de licencia CCAA (TURO)')
+                            ->maxLength(255),
+                        TextInput::make('extra_beds')
+                            ->numeric()
+                            ->minValue(0)
+                            ->label('Camas supletorias disponibles'),
+                        TextInput::make('cribs')
+                            ->numeric()
+                            ->minValue(0)
+                            ->label('Cunas disponibles'),
+                    ]),
             ]);
     }
 }

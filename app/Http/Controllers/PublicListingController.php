@@ -5,15 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\BookingStatus;
 use App\Models\{Listing, Booking};
 use App\Services\BookingPriceService;
+use App\Services\PublicBookingCreator;
 use App\Http\Requests\StorePublicBookingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Carbon\CarbonPeriod;
-
-use Illuminate\Support\Facades\Mail;
-use App\Mail\PublicBookingHoldCustomerMail;
-use App\Mail\PublicBookingHoldOwnerMail;
-
 
 class PublicListingController extends Controller
 {
@@ -139,69 +135,17 @@ class PublicListingController extends Controller
         return response()->json(['prices' => $prices]);
     }
 
-    public function book(StorePublicBookingRequest $request, Listing $listing, BookingPriceService $svc)
+    public function book(StorePublicBookingRequest $request, Listing $listing, PublicBookingCreator $creator)
     {
-        $data = $request->validated();
-
-        // 1) Comprobar disponibilidad de nuevo en servidor
-        $arrival   = Carbon::parse($data['arrival']);
-        $departure = Carbon::parse($data['departure']);
-
-        $overlapExists = Booking::query()
-            ->where('listing_id', $listing->id)
-            ->whereIn('status', BookingStatus::blocking())
-            ->where(function ($q) use ($arrival, $departure) {
-                // solape clásico: NOT (end <= A OR start >= B)
-                $q->where('arrival', '<', $departure)
-                  ->where('departure', '>', $arrival);
-            })
-            ->exists();
-
-        if ($overlapExists) {
+        try {
+            [$booking, $quote] = $creator->create($listing, $request->validated());
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'ok'    => false,
+                'ok' => false,
                 'error' => 'Las fechas seleccionadas ya no están disponibles. Por favor, selecciona otro rango.',
+                'messages' => $e->errors(),
             ], 422);
         }
-
-        // 2) Recalcular precio con servicio (no confiamos en el cliente)
-        $quote = $svc->quote(
-            $listing,
-            $arrival->toDateString(),
-            $departure->toDateString(),
-            (int) $data['guests']
-        );
-
-        // 3) Crear reserva en estado "hold"
-        $booking = Booking::create([
-            'listing_id'        => $listing->id,
-            'customer_name'     => $data['customer_name'],
-            'customer_email'    => $data['customer_email'],
-            'customer_phone'    => $data['customer_phone'] ?? null,
-            'arrival'           => $arrival,
-            'departure'         => $departure,
-            'guests'            => (int) $data['guests'],
-            'status'            => BookingStatus::Pending->value,
-            'total'             => $quote['total'],   // total final
-            'source'            => 'web',
-            'notes'             => $data['notes'] ?? null,
-            'terms_accepted_at' => now(),
-        ]);
-
-        // 4) mails a cliente y propietaria
-
-        $booking = $booking->fresh(['listing']); // una vez y listo
-
-        Mail::to($booking->customer_email)
-            ->send(new PublicBookingHoldCustomerMail($booking, $quote));
-
-        $ownerEmail = config('villa.owner_email');
-        if ($ownerEmail) {
-            $adminUrl = url("/admin/bookings/{$booking->id}/edit"); // ajusta si tu ruta Filament difiere
-            Mail::to($ownerEmail)
-                ->send(new PublicBookingHoldOwnerMail($booking, $quote, $adminUrl));
-        }
-
 
         return response()->json([
             'ok'      => true,

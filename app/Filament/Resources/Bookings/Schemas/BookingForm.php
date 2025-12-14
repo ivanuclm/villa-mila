@@ -58,6 +58,32 @@ class BookingForm
                                         ->maxLength(30)
                                         ->columnSpanFull(),
                                 ]),
+                            Section::make('Datos del representante / firmante')
+                                ->columns(3)
+                                ->schema([
+                                    TextInput::make('customer_first_name')->label('Nombre')->columnSpan(1),
+                                    TextInput::make('customer_first_surname')->label('Primer apellido')->columnSpan(1),
+                                    TextInput::make('customer_second_surname')->label('Segundo apellido')->columnSpan(1),
+                                    Select::make('customer_document_type')
+                                        ->label('Tipo documento')
+                                        ->options([
+                                            'dni' => 'DNI',
+                                            'nie' => 'NIE',
+                                            'passport' => 'Pasaporte',
+                                            'other' => 'Otro',
+                                        ])
+                                        ->searchable()
+                                        ->native(false),
+                                    TextInput::make('customer_document_number')->label('Nº documento'),
+                                    TextInput::make('customer_document_support_number')->label('Nº de soporte'),
+                                    DatePicker::make('customer_birthdate')->label('Fecha de nacimiento'),
+                                    TextInput::make('customer_birth_country')->label('País de nacimiento'),
+                                    TextInput::make('customer_address_country')->label('País de residencia'),
+                                    TextInput::make('customer_address_street')->label('Calle y vía')->columnSpan(2),
+                                    TextInput::make('customer_address_number')->label('Número')->columnSpan(1),
+                                    TextInput::make('customer_address_city')->label('Ciudad')->columnSpan(1),
+                                    TextInput::make('customer_address_province')->label('Provincia / Estado')->columnSpan(1),
+                                ]),
                         ]),
                     Tab::make('Estancia y precio')
                         ->schema([
